@@ -149,8 +149,10 @@ describe('adaptive pairing (P1-2)', () => {
   })
 
   // PRD P1-2 acceptance: reaches a given accuracy in fewer comparisons than non-adaptive
-  // pairing. Measured as higher mean Kendall tau at the same budget (400 comparisons).
-  it('recovers the true order better than balanced pairing (20 simulated users)', () => {
+  // pairing. Measured as higher mean Kendall tau at the same budget (400 comparisons),
+  // averaged over 3 seeds x 20 simulated users. The real gap is ~0.03; picking the second
+  // idol at random instead gives ~0.00, so a 0.015 margin catches that regression.
+  it('recovers the true order better than balanced pairing (60 simulated users)', () => {
     const trueStrengths = new Map(ids18.map((id, i) => [id, Math.exp(-2 + (4 * i) / 17)]))
     const truth = ids18.map((id) => trueStrengths.get(id))
 
@@ -175,6 +177,10 @@ describe('adaptive pairing (P1-2)', () => {
       return total / 20
     }
 
-    expect(meanTau(true, 10)).toBeGreaterThan(meanTau(false, 10))
+    const seeds = [10, 11, 12]
+    const meanGap =
+      seeds.reduce((sum, seed) => sum + meanTau(true, seed) - meanTau(false, seed), 0) /
+      seeds.length
+    expect(meanGap).toBeGreaterThan(0.015)
   })
 })
