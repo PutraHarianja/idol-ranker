@@ -40,7 +40,11 @@ export const useRankingStore = defineStore('ranking', () => {
 
   function nextPair() {
     lastPair.value = currentPair.value
-    currentPair.value = selectPair(idolIds, validComparisons.value, { lastPair: lastPair.value })
+    const strengths = new Map(ranking.value.map((entry) => [entry.id, entry.strength]))
+    currentPair.value = selectPair(idolIds, validComparisons.value, {
+      lastPair: lastPair.value,
+      strengths,
+    })
   }
 
   /** Records a pick for the idol on `side` ('left' | 'right') and loads the next pair (R2). */
@@ -56,6 +60,21 @@ export const useRankingStore = defineStore('ranking', () => {
   /** Loads a new pair without recording anything (R4). */
   function skip() {
     nextPair()
+  }
+
+  /** Removes the last pick and shows that pair again (P1-1). Can be repeated. */
+  function undo() {
+    const last = comparisons.value.at(-1)
+    if (!last) return
+    comparisons.value = comparisons.value.slice(0, -1)
+    saveComparisons(comparisons.value)
+    lastPair.value = null
+    const { winnerId, loserId } = last
+    if (idolsById.has(winnerId) && idolsById.has(loserId)) {
+      currentPair.value = Math.random() < 0.5 ? [winnerId, loserId] : [loserId, winnerId]
+    } else {
+      currentPair.value = selectPair(idolIds, validComparisons.value)
+    }
   }
 
   /** Clears the log and storage (R9). Confirmation is handled by the UI. */
@@ -81,6 +100,7 @@ export const useRankingStore = defineStore('ranking', () => {
     ranking,
     pick,
     skip,
+    undo,
     reset,
   }
 })

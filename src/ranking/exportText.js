@@ -1,0 +1,13 @@
+// Plain-text ranking for copying to the clipboard (P1-5). Pure JS — no Vue imports.
+
+/**
+ * @param {{ rank: number, score: number, idol: { name: string, group: string } }[]} ranking
+ * @param {{ decisions: number, provisional: boolean }} meta
+ */
+export function formatRankingText(ranking, { decisions, provisional }) {
+  const header = `👑 My Idol Ranking (${decisions} ${decisions === 1 ? 'pick' : 'picks'}${provisional ? ', provisional' : ''})`
+  const lines = ranking.map(
+    ({ rank, score, idol }) => `${rank}. ${idol.name} (${idol.group}) — ${score}`,
+  )
+  return [header, ...lines].join('\n')
+}

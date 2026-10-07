@@ -1,0 +1,26 @@
+import { describe, it, expect } from 'vitest'
+import { formatRankingText } from '../src/ranking/exportText.js'
+
+const ranking = [
+  { rank: 1, score: 81, idol: { name: 'Joy', group: 'Red Velvet' } },
+  { rank: 1, score: 81, idol: { name: 'Karina', group: 'aespa' } },
+  { rank: 3, score: 40, idol: { name: 'Rosé', group: 'BLACKPINK' } },
+]
+
+describe('formatRankingText (P1-5)', () => {
+  it('lists rank, name, group and score, one per line', () => {
+    expect(formatRankingText(ranking, { decisions: 27, provisional: false })).toBe(
+      [
+        '👑 My Idol Ranking (27 picks)',
+        '1. Joy (Red Velvet) — 81',
+        '1. Karina (aespa) — 81',
+        '3. Rosé (BLACKPINK) — 40',
+      ].join('\n'),
+    )
+  })
+
+  it('marks a provisional ranking and uses singular "pick"', () => {
+    const text = formatRankingText(ranking.slice(0, 1), { decisions: 1, provisional: true })
+    expect(text.split('\n')[0]).toBe('👑 My Idol Ranking (1 pick, provisional)')
+  })
+})

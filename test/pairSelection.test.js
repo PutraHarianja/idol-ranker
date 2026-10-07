@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { selectPair, countAppearances } from '../src/ranking/pairSelection.js'
-import { seededRandom } from './helpers.js'
+import { fitBradleyTerry } from '../src/ranking/bradleyTerry.js'
+import { seededRandom, kendallTau } from './helpers.js'
 
 const ids18 = Array.from({ length: 18 }, (_, i) => `idol-${i}`)
 const samePair = (p, q) => p.includes(q[0]) && p.includes(q[1])
@@ -98,5 +99,82 @@ describe('selectPair (R2, R3)', () => {
   it('ignores unknown ids in the log when counting appearances', () => {
     const counts = countAppearances(['a', 'b'], [{ winnerId: 'ghost', loserId: 'a' }])
     expect(Object.fromEntries(counts)).toEqual({ a: 1, b: 0 })
+  })
+})
+
+describe('adaptive pairing (P1-2)', () => {
+  // Strengths 1..18, so idol-i's closest neighbours are idol-(i±1), idol-(i±2), ...
+  const strengths = new Map(ids18.map((id, i) => [id, i + 1]))
+  const everyoneSeen = (times) =>
+    ids18.flatMap((id, i) =>
+      Array.from({ length: times }, () => ({ winnerId: id, loserId: ids18[(i + 1) % 18] })),
+    )
+
+  it('pairs each idol with one of the 3 closest in strength once all have >= 3 appearances', () => {
+    const random = seededRandom(7)
+    const log = everyoneSeen(2) // every idol appears 4 times
+    const gap = (x, y) => Math.abs(Math.log(strengths.get(x) / strengths.get(y)))
+    const closest3 = (x) =>
+      ids18
+        .filter((id) => id !== x)
+        .sort((p, q) => gap(p, x) - gap(q, x))
+        .slice(0, 3)
+    for (let k = 0; k < 500; k++) {
+      const [a, b] = selectPair(ids18, log, { strengths, random })
+      // Left/right is random, so either idol could have been the "first" one.
+      expect(closest3(a).includes(b) || closest3(b).includes(a)).toBe(true)
+    }
+  })
+
+  it('keeps balanced pairing until every idol has 3 appearances', () => {
+    const random = seededRandom(8)
+    const log = runSession(ids18, 10, random)
+    const counts = countAppearances(ids18, log)
+    const min = Math.min(...counts.values())
+    for (let k = 0; k < 200; k++) {
+      const pair = selectPair(ids18, log, { strengths, random })
+      expect(pair.every((id) => counts.get(id) <= min + 1)).toBe(true)
+    }
+  })
+
+  it('never repeats the last pair in adaptive mode', () => {
+    const random = seededRandom(9)
+    const log = everyoneSeen(2)
+    let lastPair = null
+    for (let k = 0; k < 500; k++) {
+      const pair = selectPair(ids18, log, { lastPair, strengths, random })
+      if (lastPair) expect(samePair(pair, lastPair)).toBe(false)
+      lastPair = pair
+    }
+  })
+
+  // PRD P1-2 acceptance: reaches a given accuracy in fewer comparisons than non-adaptive
+  // pairing. Measured as higher mean Kendall tau at the same budget (400 comparisons).
+  it('recovers the true order better than balanced pairing (20 simulated users)', () => {
+    const trueStrengths = new Map(ids18.map((id, i) => [id, Math.exp(-2 + (4 * i) / 17)]))
+    const truth = ids18.map((id) => trueStrengths.get(id))
+
+    function meanTau(adaptive, seed) {
+      const random = seededRandom(seed)
+      let total = 0
+      for (let run = 0; run < 20; run++) {
+        const log = []
+        let lastPair = null
+        while (log.length < 400) {
+          const fitted = adaptive
+            ? new Map(fitBradleyTerry(ids18, log).map((r) => [r.id, r.strength]))
+            : null
+          const [a, b] = selectPair(ids18, log, { lastPair, strengths: fitted, random })
+          const pA = trueStrengths.get(a) / (trueStrengths.get(a) + trueStrengths.get(b))
+          log.push(random() < pA ? { winnerId: a, loserId: b } : { winnerId: b, loserId: a })
+          lastPair = [a, b]
+        }
+        const fit = new Map(fitBradleyTerry(ids18, log).map((r) => [r.id, r.strength]))
+        total += kendallTau(truth, ids18.map((id) => fit.get(id)))
+      }
+      return total / 20
+    }
+
+    expect(meanTau(true, 10)).toBeGreaterThan(meanTau(false, 10))
   })
 })

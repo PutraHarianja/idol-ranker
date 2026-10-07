@@ -77,6 +77,27 @@ describe('ranking store', () => {
     expect(ids[0] < ids.at(-1)).toBe(true)
   })
 
+  it('undo removes the last pick, saves, and shows that pair again (P1-1)', () => {
+    const data = stubStorage()
+    const store = useRankingStore()
+    const first = store.pair.map((idol) => idol.id)
+    store.pick('left')
+    const second = store.pair.map((idol) => idol.id)
+    store.pick('right')
+
+    store.undo()
+    expect(store.decisions).toBe(1)
+    expect(JSON.parse(data[KEY]).comparisons).toHaveLength(1)
+    expect(new Set(store.pair.map((idol) => idol.id))).toEqual(new Set(second))
+
+    store.undo()
+    expect(store.decisions).toBe(0)
+    expect(new Set(store.pair.map((idol) => idol.id))).toEqual(new Set(first))
+
+    store.undo() // nothing left: no-op
+    expect(store.decisions).toBe(0)
+  })
+
   it('reset clears the log and storage (R9)', () => {
     const data = stubStorage()
     const store = useRankingStore()

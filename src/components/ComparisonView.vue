@@ -52,9 +52,19 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
       <IdolCard :idol="store.pair[1]" key-hint="→" @pick="store.pick('right')" />
     </div>
 
-    <button type="button" class="skip" @click="store.skip()">
-      Can't decide <kbd>S</kbd>
-    </button>
+    <div class="controls">
+      <button type="button" class="skip" @click="store.skip()">
+        Can't decide <kbd>S</kbd>
+      </button>
+      <button
+        type="button"
+        class="skip"
+        :disabled="store.comparisons.length === 0"
+        @click="store.undo()"
+      >
+        ↶ Undo
+      </button>
+    </div>
   </section>
 </template>
 
@@ -107,8 +117,16 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
   font-weight: 700;
   text-transform: uppercase;
 }
+.controls {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+}
+.skip:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
 .skip {
-  align-self: center;
   padding: 0.6rem 1.2rem;
   border: 1px solid var(--border);
   border-radius: 999px;

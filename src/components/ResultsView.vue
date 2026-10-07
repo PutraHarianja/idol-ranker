@@ -2,10 +2,27 @@
 import { ref } from 'vue'
 import { useRankingStore } from '../stores/ranking.js'
 import IdolAvatar from './IdolAvatar.vue'
+import { formatRankingText } from '../ranking/exportText.js'
 
 const store = useRankingStore()
 const emit = defineEmits(['back'])
 const confirmingReset = ref(false)
+const copyStatus = ref('')
+
+// Copies the ranking as a text list (P1-5).
+async function copyRanking() {
+  const text = formatRankingText(store.ranking, {
+    decisions: store.decisions,
+    provisional: store.isProvisional,
+  })
+  try {
+    await navigator.clipboard.writeText(text)
+    copyStatus.value = 'Copied!'
+  } catch {
+    copyStatus.value = "Couldn't copy — your browser blocked clipboard access."
+  }
+  setTimeout(() => (copyStatus.value = ''), 2500)
+}
 
 function confirmReset() {
   store.reset()
@@ -39,6 +56,8 @@ function confirmReset() {
 
     <div class="actions">
       <button type="button" class="primary" @click="emit('back')">Keep comparing</button>
+      <button type="button" class="plain" @click="copyRanking">Copy as text</button>
+      <span v-if="copyStatus" class="copy-status" role="status">{{ copyStatus }}</span>
       <template v-if="!confirmingReset">
         <button type="button" class="danger-link" @click="confirmingReset = true">
           Start over
@@ -117,6 +136,10 @@ function confirmReset() {
   flex-wrap: wrap;
   align-items: center;
   gap: 0.75rem;
+}
+.copy-status {
+  color: var(--muted);
+  font-size: 0.9rem;
 }
 .confirm {
   display: flex;
