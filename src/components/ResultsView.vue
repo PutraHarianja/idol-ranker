@@ -41,8 +41,9 @@ function confirmReset() {
     <h2 class="headline">Your top picks</h2>
 
     <p class="help">
-      <strong>Goddess Score</strong> is how likely she wins against an average idol (0–100), based
-      on your {{ store.decisions }} {{ store.decisions === 1 ? 'pick' : 'picks' }}.
+      You know exactly who you love. These are the idols you kept choosing across your
+      {{ store.decisions }} {{ store.decisions === 1 ? 'pick' : 'picks' }}, each with her
+      <strong>Goddess Score</strong>.
     </p>
 
     <p v-if="store.isProvisional" class="banner" role="status">

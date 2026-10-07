@@ -7,20 +7,26 @@ import AppIcon from './AppIcon.vue'
 const store = useRankingStore()
 defineEmits(['show-results'])
 
-// A sparkle sticker stamps over the side that was just picked (visual only).
-const stamp = ref(null)
-let stampId = 0
-function pick(side) {
-  store.pick(side)
-  stamp.value = { id: ++stampId, side }
+// Visual only: after a pick or skip, the pair that was just answered stays on top for a beat
+// while a sticker stamps onto the chosen card (both cards on a skip), then fades to reveal the
+// next pair. The store is updated immediately, exactly as before.
+const flash = ref(null)
+let flashId = 0
+function stampAndRun(side, action) {
+  const answered = store.pair
+  action()
+  if (answered) flash.value = { id: ++flashId, pair: answered, side }
 }
+const pick = (side) => stampAndRun(side, () => store.pick(side))
+const skip = () => stampAndRun('both', () => store.skip())
+const stamped = (side) => flash.value && (flash.value.side === side || flash.value.side === 'both')
 
 // ← picks left, → picks right, ↓ or S skips (R2).
 function onKeydown(e) {
   if (e.repeat || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return
   if (e.key === 'ArrowLeft') pick('left')
   else if (e.key === 'ArrowRight') pick('right')
-  else if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') store.skip()
+  else if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') skip()
   else return
   e.preventDefault()
 }
@@ -28,7 +34,6 @@ function onKeydown(e) {
 onMounted(() => window.addEventListener('keydown', onKeydown))
 onUnmounted(() => window.removeEventListener('keydown', onKeydown))
 
-const pairKey = computed(() => store.pair?.map((idol) => idol.id).join('|'))
 const milestone = computed(() => {
   const ratio = store.decisions / store.target
   if (ratio >= 1) return 'Extra picks make it even sharper'
@@ -70,25 +75,36 @@ const milestone = computed(() => {
     </div>
 
     <div v-if="store.pair" class="stage">
-      <div :key="pairKey" class="pair">
+      <div class="pair">
         <IdolCard :idol="store.pair[0]" side="left" key-hint="←" @pick="pick('left')" />
         <IdolCard :idol="store.pair[1]" side="right" key-hint="→" @pick="pick('right')" />
       </div>
-      <span
-        v-if="stamp"
-        :key="stamp.id"
-        class="stamp"
-        :class="`stamp--${stamp.side}`"
+
+      <div
+        v-if="flash"
+        :key="flash.id"
+        class="flash pair"
         aria-hidden="true"
-        @animationend="stamp = null"
+        inert
+        @animationend.self="flash = null"
       >
-        <AppIcon name="sparkle" :size="56" />
-      </span>
+        <div
+          v-for="(side, i) in ['left', 'right']"
+          :key="side"
+          class="flash__slot"
+          :class="{ 'flash__slot--chosen': stamped(side) }"
+        >
+          <IdolCard :idol="flash.pair[i]" :side="side" />
+          <span v-if="stamped(side)" class="stamp">
+            <AppIcon :name="flash.side === 'both' ? 'heart' : 'sparkle'" :size="64" />
+          </span>
+        </div>
+      </div>
     </div>
 
     <div class="controls">
-      <button type="button" class="control" aria-keyshortcuts="S" @click="store.skip()">
-        Both are cute <kbd aria-hidden="true">S</kbd>
+      <button type="button" class="control" aria-keyshortcuts="S" @click="skip()">
+        I love them both <kbd aria-hidden="true">S</kbd>
       </button>
       <button
         type="button"
@@ -187,47 +203,80 @@ const milestone = computed(() => {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1.25rem;
-  animation: pair-in 0.22s ease-out;
 }
-@keyframes pair-in {
-  from {
+
+/* The answered pair, held on top of the next pair while the sticker lands, then faded out. */
+.flash {
+  position: absolute;
+  inset: 8px 0 auto;
+  z-index: 2;
+  pointer-events: none;
+  animation: flash-out 1s ease-in forwards;
+}
+@keyframes flash-out {
+  0%,
+  65% {
+    opacity: 1;
+    transform: none;
+  }
+  100% {
     opacity: 0;
-    transform: translateY(8px) scale(0.98);
+    transform: translateY(-10px) scale(0.98);
   }
 }
-/* Stamps on the card's top corner, like a sticker on a photocard sleeve, never over a face. */
+.flash__slot {
+  position: relative;
+}
+/* Mute the other card without making it see-through (the next pair is underneath). */
+.flash__slot:not(.flash__slot--chosen) {
+  filter: grayscale(1) brightness(0.9);
+}
+.flash__slot--chosen {
+  animation: thump 0.45s ease-out;
+}
+@keyframes thump {
+  0%,
+  15% {
+    transform: none;
+  }
+  25% {
+    transform: scale(0.96);
+  }
+  45% {
+    transform: scale(1.02);
+  }
+  100% {
+    transform: none;
+  }
+}
+/* Sticker lands on the card's top corner, never over a face. */
 .stamp {
   position: absolute;
-  top: -14px;
-  z-index: 2;
+  top: -22px;
+  right: -16px;
+  z-index: 3;
   color: var(--accent);
-  filter: drop-shadow(0 2px 0 var(--text));
-  pointer-events: none;
-  animation: stamp 0.55s ease-out forwards;
-}
-.stamp--left {
-  right: calc(50% + 0.1rem);
-}
-.stamp--right {
-  right: -0.9rem;
+  filter: drop-shadow(0 3px 0 var(--text));
+  animation: stamp 0.45s cubic-bezier(0.2, 0.8, 0.3, 1.2) both;
 }
 @keyframes stamp {
   0% {
     opacity: 0;
-    transform: scale(0.3) rotate(-25deg);
+    transform: scale(2.4) rotate(-30deg);
   }
   35% {
     opacity: 1;
-    transform: scale(1.15) rotate(8deg);
+    transform: scale(0.85) rotate(8deg);
   }
   60% {
-    transform: scale(1) rotate(0deg);
+    transform: scale(1.08) rotate(-4deg);
   }
   100% {
-    opacity: 0;
-    transform: scale(1) rotate(0deg);
+    opacity: 1;
+    transform: scale(1) rotate(-6deg);
   }
 }
+
 .controls {
   display: flex;
   justify-content: center;
@@ -273,12 +322,13 @@ const milestone = computed(() => {
   .pair {
     gap: 0.75rem;
   }
-  .stamp :deep(svg) {
-    width: 42px;
-    height: 42px;
+  .stamp {
+    top: -16px;
+    right: -10px;
   }
-  .stamp--right {
-    right: -0.5rem;
+  .stamp :deep(svg) {
+    width: 48px;
+    height: 48px;
   }
 }
 @media (hover: none) {
@@ -290,10 +340,7 @@ const milestone = computed(() => {
   .progress__fill {
     transition: none;
   }
-  .pair {
-    animation: none;
-  }
-  .stamp {
+  .flash {
     display: none;
   }
 }
