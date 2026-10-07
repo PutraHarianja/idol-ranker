@@ -21,6 +21,20 @@ const IDOLS = [
   { id: 'lesserafim-chaewon', name: 'Chaewon', group: 'LE SSERAFIM' },
 ]
 
+// Background color for each group's initials avatar (used when a photo is missing).
+const GROUP_COLORS = {
+  BLACKPINK: '#d6336c',
+  TWICE: '#f08c00',
+  'Red Velvet': '#c92a2a',
+  aespa: '#5f3dc4',
+  IVE: '#1971c2',
+  'LE SSERAFIM': '#2b8a3e',
+}
+
+export function getGroupColor(group) {
+  return GROUP_COLORS[group] ?? '#495057'
+}
+
 // Single access point for idol data, so the source can be swapped later (P2-1).
 export function getIdols() {
   return IDOLS.map((idol) => ({ ...idol }))
