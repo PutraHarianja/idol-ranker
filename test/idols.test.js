@@ -1,4 +1,6 @@
 import { describe, it, expect } from 'vitest'
+import { existsSync, statSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
 import { getIdols } from '../src/data/idols.js'
 
 describe('getIdols (R1)', () => {
@@ -22,6 +24,19 @@ describe('getIdols (R1)', () => {
       expect(idol.id).toMatch(/^[a-z0-9]+(-[a-z0-9]+)+$/)
       expect(idol.name).toBeTruthy()
       expect(idol.group).toBeTruthy()
+    }
+  })
+
+  it('gives every photo a free license, credit and source, and a file under 200 KB (R10)', () => {
+    for (const { id, image } of getIdols()) {
+      if (!image) continue
+      expect(image.src).toBe(`/idols/${id}.jpg`)
+      expect(image.author).toBeTruthy()
+      expect(image.license).toMatch(/^(CC BY(-SA)? [34]\.0|CC0|Public domain)$/)
+      expect(image.sourceUrl).toMatch(/^https:\/\/commons\.wikimedia\.org\/wiki\/File:/)
+      const file = fileURLToPath(new URL(`../public${image.src}`, import.meta.url))
+      expect(existsSync(file)).toBe(true)
+      expect(statSync(file).size).toBeLessThan(200 * 1024)
     }
   })
 

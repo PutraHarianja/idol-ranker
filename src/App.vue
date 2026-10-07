@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import ComparisonView from './components/ComparisonView.vue'
 import ResultsView from './components/ResultsView.vue'
+import CreditsView from './components/CreditsView.vue'
 
 const view = ref('compare')
 </script>
@@ -32,8 +33,14 @@ const view = ref('compare')
 
     <main>
       <ComparisonView v-if="view === 'compare'" @show-results="view = 'results'" />
-      <ResultsView v-else @back="view = 'compare'" />
+      <ResultsView v-else-if="view === 'results'" @back="view = 'compare'" />
+      <CreditsView v-else @back="view = 'compare'" />
     </main>
+
+    <footer class="footer">
+      Photos from Wikimedia Commons ·
+      <button type="button" class="link" @click="view = 'credits'">Photo credits</button>
+    </footer>
   </div>
 </template>
 
@@ -117,6 +124,16 @@ body {
 .tabs button.active {
   background: var(--surface);
   font-weight: 600;
+}
+.footer {
+  margin-top: 2rem;
+  color: var(--muted);
+  font-size: 0.8rem;
+  text-align: center;
+}
+.footer .link {
+  font-size: inherit;
+  font-weight: 400;
 }
 .link {
   border: none;
