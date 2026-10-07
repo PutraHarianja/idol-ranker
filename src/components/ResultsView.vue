@@ -43,14 +43,22 @@ function confirmReset() {
     </p>
 
     <ol class="list">
-      <li v-for="entry in store.ranking" :key="entry.id" class="row">
+      <li
+        v-for="entry in store.ranking"
+        :key="entry.id"
+        class="row"
+        :class="{ 'row--top': entry.rank <= 3 }"
+      >
         <span class="rank">{{ entry.rank }}</span>
         <IdolAvatar class="thumb" :idol="entry.idol" />
         <span class="who">
           <span class="name">{{ entry.idol.name }}</span>
           <span class="group">{{ entry.idol.group }}</span>
+          <span class="meter" aria-hidden="true">
+            <span class="meter__fill" :style="{ width: `${entry.score}%` }" />
+          </span>
         </span>
-        <span class="score" :aria-label="`Goddess Score ${entry.score}`">{{ entry.score }}</span>
+        <span class="score"><span class="sr-only">Goddess Score </span>{{ entry.score }}</span>
       </li>
     </ol>
 
@@ -76,36 +84,48 @@ function confirmReset() {
 .results {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.25rem;
 }
 .banner {
   margin: 0;
-  padding: 0.75rem 1rem;
+  padding: 0.8rem 1rem;
   border-radius: var(--radius);
   background: var(--warn-soft);
   color: var(--warn-text);
 }
 .help {
   margin: 0;
+  max-width: 60ch;
   color: var(--muted);
   font-size: 0.9rem;
 }
+.help strong {
+  color: var(--text);
+}
 .list {
   margin: 0;
-  padding: 0;
+  padding: 0.35rem 1rem;
+  border-radius: 18px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
   list-style: none;
 }
 .row {
   display: grid;
-  grid-template-columns: 2rem 40px 1fr auto;
+  grid-template-columns: 1.75rem 40px 1fr auto;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.5rem 0;
+  gap: 0.85rem;
+  padding: 0.6rem 0;
   border-bottom: 1px solid var(--border);
+}
+.row:last-child {
+  border-bottom: none;
 }
 .rank {
   color: var(--muted);
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 500;
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
@@ -119,23 +139,70 @@ function confirmReset() {
   min-width: 0;
 }
 .name {
-  font-weight: 600;
+  font-weight: 700;
 }
 .group {
   color: var(--muted);
   font-size: 0.85rem;
 }
+.meter {
+  height: 4px;
+  margin-top: 0.4rem;
+  border-radius: 999px;
+  background: var(--border);
+  overflow: hidden;
+}
+.meter__fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent);
+}
 .score {
-  font-size: 1.25rem;
+  min-width: 2.5ch;
+  font-family: var(--font-display);
+  font-size: 1.1rem;
   font-weight: 700;
+  text-align: right;
   font-variant-numeric: tabular-nums;
   color: var(--accent);
+}
+/* The top three get bigger photos and type, like the front of a binder. */
+.row--top {
+  grid-template-columns: 1.75rem 56px 1fr auto;
+  padding: 0.8rem 0;
+}
+.row--top .rank {
+  color: var(--text);
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+.row--top .thumb {
+  border-radius: 8px;
+  font-size: 1.25rem;
+}
+.row--top .name {
+  font-size: 1.1rem;
+}
+.row--top .score {
+  font-size: 1.35rem;
+}
+.row--top .meter {
+  height: 6px;
 }
 .actions {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.6rem;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 .copy-status {
   color: var(--muted);
@@ -146,31 +213,57 @@ function confirmReset() {
   flex-wrap: wrap;
   align-items: center;
   gap: 0.5rem;
-}
-button {
-  font: inherit;
-  cursor: pointer;
-  border-radius: 999px;
-  padding: 0.55rem 1.1rem;
-}
-.primary {
-  border: none;
-  background: var(--accent);
-  color: #fff;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--danger);
+  border-radius: var(--radius);
   font-weight: 600;
 }
+button {
+  min-height: 44px;
+  border: 1px solid transparent;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 999px;
+  padding: 0.6rem 1.2rem;
+}
+button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.primary {
+  background: var(--accent);
+  color: var(--on-accent);
+}
 .danger {
-  border: none;
   background: var(--danger);
-  color: #fff;
+  color: var(--on-accent);
 }
 .plain,
 .danger-link {
   border: 1px solid var(--border);
-  background: transparent;
+  background: var(--surface);
   color: var(--text);
+}
+.plain:hover,
+.danger-link:hover {
+  border-color: var(--muted);
 }
 .danger-link {
   color: var(--danger);
+}
+/* Start over sits apart from the safe actions. */
+.danger-link,
+.confirm {
+  margin-left: auto;
+}
+@media (max-width: 559px) {
+  .list {
+    padding: 0.25rem 0.75rem;
+  }
+  .row,
+  .row--top {
+    gap: 0.6rem;
+  }
 }
 </style>

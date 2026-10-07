@@ -43,7 +43,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
 
     <div v-if="store.isReady" class="ready">
       <span>🎉 Your ranking is ready!</span>
-      <button type="button" class="link" @click="$emit('show-results')">See results</button>
+      <button type="button" class="cta" @click="$emit('show-results')">See results</button>
     </div>
 
     <div v-if="store.pair" class="pair">
@@ -72,28 +72,33 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
 .compare {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.25rem;
 }
 .progress__label {
   display: flex;
+  align-items: baseline;
   justify-content: space-between;
-  margin-bottom: 0.4rem;
-  font-weight: 600;
+  margin-bottom: 0.5rem;
+  font-size: 1.05rem;
+  font-weight: 700;
 }
 .progress__count {
   color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
 .progress__track {
-  height: 6px;
-  border-radius: 3px;
+  height: 8px;
+  border-radius: 999px;
   background: var(--border);
   overflow: hidden;
 }
 .progress__fill {
   height: 100%;
+  border-radius: inherit;
   background: var(--accent);
-  transition: width 0.2s ease;
+  transition: width 0.25s ease;
 }
 .ready {
   display: flex;
@@ -101,52 +106,95 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
-  padding: 0.75rem 1rem;
+  padding: 0.8rem 1rem;
   border-radius: var(--radius);
   background: var(--accent-soft);
   font-weight: 600;
+}
+.cta {
+  min-height: 44px;
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.cta:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 .pair {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.9rem;
 }
 .vs {
-  color: var(--muted);
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: var(--text);
+  color: var(--bg);
+  font-family: var(--font-display);
+  font-size: 0.75rem;
   font-weight: 700;
-  text-transform: uppercase;
 }
 .controls {
   display: flex;
   justify-content: center;
-  gap: 0.5rem;
+  gap: 0.6rem;
+}
+.skip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.65rem 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.skip:hover:not(:disabled) {
+  border-color: var(--muted);
+}
+.skip:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 .skip:disabled {
   opacity: 0.4;
   cursor: default;
 }
-.skip {
-  padding: 0.6rem 1.2rem;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  background: transparent;
-  color: var(--text);
-  font: inherit;
-  cursor: pointer;
-}
 .skip kbd {
-  margin-left: 0.3rem;
+  padding: 0.05rem 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: 5px;
   color: var(--muted);
-  font-size: 0.8rem;
+  font-family: inherit;
+  font-size: 0.75rem;
 }
 /* Cards stay side by side on phones so both are visible without scrolling. */
 @media (max-width: 559px) {
   .pair {
-    gap: 0.4rem;
+    gap: 0.35rem;
   }
   .vs {
-    font-size: 0.75rem;
+    width: 1.75rem;
+    height: 1.75rem;
+    font-size: 0.6rem;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .progress__fill {
+    transition: none;
   }
 }
 </style>
