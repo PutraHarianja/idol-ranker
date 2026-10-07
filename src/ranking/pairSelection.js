@@ -17,7 +17,8 @@ function pickRandom(items, random) {
 /**
  * Picks the next pair to show.
  * - First idol: random among those with the fewest appearances.
- * - Second idol: random among the rest, avoiding a repeat of `lastPair` (either order).
+ * - Second idol: random among the least-seen of the rest, avoiding a repeat of `lastPair`
+ *   (either order). With no skips, every idol has exactly 3 appearances after 1.5 × N picks.
  * - Left/right order is randomized.
  *
  * @param {string[]} idolIds  at least 2 ids
@@ -40,8 +41,14 @@ export function selectPair(idolIds, comparisons, { lastPair = null, random = Mat
   // With only 2 idols a repeat is unavoidable, so fall back to `rest`.
   const lastPartner =
     lastPair && lastPair.includes(first) ? lastPair.find((id) => id !== first) : null
-  const candidates = rest.filter((id) => id !== lastPartner)
-  const second = pickRandom(candidates.length > 0 ? candidates : rest, random)
+  const allowed = rest.filter((id) => id !== lastPartner)
+  const pool = allowed.length > 0 ? allowed : rest
+  // Second idol also comes from the least-seen, so appearances stay level.
+  const poolMin = Math.min(...pool.map((id) => counts.get(id)))
+  const second = pickRandom(
+    pool.filter((id) => counts.get(id) === poolMin),
+    random,
+  )
 
   return random() < 0.5 ? [first, second] : [second, first]
 }

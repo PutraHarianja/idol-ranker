@@ -67,10 +67,25 @@ describe('selectPair (R2, R3)', () => {
     }
   })
 
-  it('shows every idol >= 2 times after 27 decisions (1,000 simulated sessions)', () => {
+  it('shows every idol exactly 3 times after 27 decisions with no skips (1,000 sessions)', () => {
     const random = seededRandom(5)
     for (let run = 0; run < 1000; run++) {
       const counts = countAppearances(ids18, runSession(ids18, 27, random))
+      expect([...counts.values()].every((n) => n === 3)).toBe(true)
+    }
+  })
+
+  it('shows every idol >= 2 times after 27 decisions even with skips (1,000 sessions)', () => {
+    const random = seededRandom(6)
+    for (let run = 0; run < 1000; run++) {
+      const log = []
+      let lastPair = null
+      while (log.length < 27) {
+        const pair = selectPair(ids18, log, { lastPair, random })
+        if (random() >= 0.3) log.push({ winnerId: pair[0], loserId: pair[1], timestamp: 0 })
+        lastPair = pair
+      }
+      const counts = countAppearances(ids18, log)
       expect(Math.min(...counts.values())).toBeGreaterThanOrEqual(2)
     }
   })

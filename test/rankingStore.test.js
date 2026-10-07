@@ -72,6 +72,7 @@ describe('ranking store', () => {
       store.pick(left < right ? 'left' : 'right')
     }
     expect(store.isReady).toBe(true)
+    expect(store.isProvisional).toBe(false)
     const ids = store.ranking.map((r) => r.id)
     expect(ids[0] < ids.at(-1)).toBe(true)
   })
