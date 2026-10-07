@@ -8,14 +8,21 @@ const store = useRankingStore()
 defineEmits(['show-results'])
 
 // Visual only: after a pick or skip, the pair that was just answered stays on top for a beat
-// while a sticker stamps onto the chosen card (both cards on a skip), then fades to reveal the
-// next pair. The store is updated immediately, exactly as before.
+// while a sticker stamps onto the chosen card (both cards on a skip), then the cards flip over
+// to the next pair, like turning photocards. Cards stay opaque, so two faces never blend.
+// The store is updated immediately, exactly as before.
 const flash = ref(null)
+const revealId = ref(0)
 let flashId = 0
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
 function stampAndRun(side, action) {
   const answered = store.pair
   action()
-  if (answered) flash.value = { id: ++flashId, pair: answered, side }
+  if (answered && !reduceMotion.matches) flash.value = { id: ++flashId, pair: answered, side }
+}
+function endFlash() {
+  flash.value = null
+  revealId.value++
 }
 const pick = (side) => stampAndRun(side, () => store.pick(side))
 const skip = () => stampAndRun('both', () => store.skip())
@@ -75,7 +82,11 @@ const milestone = computed(() => {
     </div>
 
     <div v-if="store.pair" class="stage">
-      <div class="pair">
+      <div
+        :key="revealId"
+        class="pair"
+        :class="{ 'pair--waiting': flash, 'pair--reveal': revealId }"
+      >
         <IdolCard :idol="store.pair[0]" side="left" key-hint="←" @pick="pick('left')" />
         <IdolCard :idol="store.pair[1]" side="right" key-hint="→" @pick="pick('right')" />
       </div>
@@ -86,7 +97,7 @@ const milestone = computed(() => {
         class="flash pair"
         aria-hidden="true"
         inert
-        @animationend.self="flash = null"
+        @animationend.self="endFlash"
       >
         <div
           v-for="(side, i) in ['left', 'right']"
@@ -205,34 +216,63 @@ const milestone = computed(() => {
   gap: 1.25rem;
 }
 
-/* The answered pair, held on top of the next pair while the sticker lands, then faded out. */
+/* The answered pair, held fully opaque on top while the sticker lands, then flipped away
+   edge-on. The next pair waits hidden and flips in from the other edge. No opacity fades:
+   a cross-fade would blend two idols' faces. */
 .flash {
   position: absolute;
   inset: 8px 0 auto;
   z-index: 2;
   pointer-events: none;
-  animation: flash-out 1s ease-in forwards;
+  perspective: 900px;
+  animation: flash-hold 0.74s linear forwards;
 }
-@keyframes flash-out {
-  0%,
-  65% {
-    opacity: 1;
+@keyframes flash-hold {
+  from {
     transform: none;
   }
-  100% {
-    opacity: 0;
-    transform: translateY(-10px) scale(0.98);
+  to {
+    transform: none;
   }
 }
 .flash__slot {
   position: relative;
+  animation: flip-out 0.16s ease-in 0.52s forwards;
 }
-/* Mute the other card without making it see-through (the next pair is underneath). */
-.flash__slot:not(.flash__slot--chosen) {
-  filter: grayscale(1) brightness(0.9);
+.flash__slot:nth-child(2) {
+  animation-delay: 0.56s;
+}
+@keyframes flip-out {
+  to {
+    transform: rotateY(90deg);
+  }
+}
+.pair--waiting {
+  visibility: hidden;
+}
+.pair--reveal {
+  perspective: 900px;
+}
+.pair--reveal > :deep(*) {
+  animation: flip-in 0.18s ease-out backwards;
+}
+.pair--reveal > :deep(:nth-child(2)) {
+  animation-delay: 0.04s;
+}
+@keyframes flip-in {
+  from {
+    transform: rotateY(-90deg);
+  }
 }
 .flash__slot--chosen {
-  animation: thump 0.45s ease-out;
+  animation:
+    thump 0.45s ease-out,
+    flip-out 0.16s ease-in 0.52s forwards;
+}
+.flash__slot--chosen:nth-child(2) {
+  animation:
+    thump 0.45s ease-out,
+    flip-out 0.16s ease-in 0.56s forwards;
 }
 @keyframes thump {
   0%,
@@ -342,6 +382,9 @@ const milestone = computed(() => {
   }
   .flash {
     display: none;
+  }
+  .pair--reveal > :deep(*) {
+    animation: none;
   }
 }
 </style>

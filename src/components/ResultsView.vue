@@ -386,5 +386,24 @@ button:focus-visible {
   .row {
     gap: 0.6rem;
   }
+  /* Phones: the two safe actions share the first row; Start over keeps its pill but sits
+     alone, centered, on the row below instead of being pushed to the right edge. */
+  .actions > .primary,
+  .actions > .plain:not(.danger-link) {
+    flex: 1 1 calc(50% - 0.3rem);
+    justify-content: center;
+    white-space: nowrap;
+  }
+  .copy-status {
+    flex-basis: 100%;
+    text-align: center;
+  }
+  .danger-link {
+    margin: 0.25rem auto 0;
+  }
+  .confirm {
+    flex-basis: 100%;
+    margin-left: 0;
+  }
 }
 </style>
