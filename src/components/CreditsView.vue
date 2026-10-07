@@ -49,8 +49,9 @@ const LICENSE_URLS = {
 h2 {
   margin: 0 0 0.35rem;
   font-family: var(--font-display);
-  font-size: 1.15rem;
-  font-weight: 700;
+  font-size: clamp(1.5rem, 6vw, 2rem);
+  font-weight: 400;
+  line-height: 1.1;
 }
 .intro {
   max-width: 60ch;
@@ -61,7 +62,7 @@ h2 {
 .list {
   margin: 0 0 1.25rem;
   padding: 0.25rem 1rem;
-  border-radius: 18px;
+  border-radius: 20px;
   background: var(--surface);
   box-shadow: var(--shadow);
   list-style: none;
@@ -99,24 +100,25 @@ h2 {
   overflow-wrap: anywhere;
 }
 a {
-  color: var(--accent);
+  color: var(--text);
+  text-decoration-color: var(--accent);
+  text-decoration-thickness: 2px;
   text-underline-offset: 0.15em;
 }
 .back {
+  min-height: 44px;
   padding: 0.6rem 1.2rem;
-  border: 1px solid var(--border);
+  border: none;
   border-radius: 999px;
   background: var(--surface);
+  box-shadow: var(--shadow);
   color: var(--text);
   font: inherit;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
 }
-.back:hover {
-  border-color: var(--muted);
-}
 .back:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--text);
   outline-offset: 2px;
 }
 </style>

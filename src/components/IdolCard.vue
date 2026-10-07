@@ -4,18 +4,21 @@ import IdolAvatar from './IdolAvatar.vue'
 defineProps({
   idol: { type: Object, required: true },
   keyHint: { type: String, default: '' },
+  // Which way the card leans and which tape color it gets, like cards stuck in a binder.
+  side: { type: String, default: 'left' },
 })
 defineEmits(['pick'])
 </script>
 
 <template>
-  <!-- Styled as a K-pop photocard: photo inside a printed margin, name printed over the photo. -->
   <button
     class="card"
+    :class="`card--${side}`"
     type="button"
     :aria-label="`Pick ${idol.name}, ${idol.group}`"
     @click="$emit('pick')"
   >
+    <span class="tape" aria-hidden="true" />
     <IdolAvatar class="photo" :idol="idol" />
     <span class="caption">
       <span class="name">{{ idol.name }}</span>
@@ -28,12 +31,13 @@ defineEmits(['pick'])
 <style scoped>
 .card {
   position: relative;
-  display: block;
+  display: flex;
+  flex-direction: column;
   width: 100%;
   min-width: 0;
-  padding: 7px;
+  padding: 7px 7px 10px;
   border: none;
-  border-radius: 18px;
+  border-radius: 14px;
   background: var(--surface);
   box-shadow: var(--shadow);
   color: var(--text);
@@ -44,103 +48,98 @@ defineEmits(['pick'])
     transform 0.15s ease,
     box-shadow 0.15s ease;
 }
-/* The printed margin turns to holographic foil when the card is hovered or focused. */
+.card--left {
+  transform: rotate(-2deg);
+}
+.card--right {
+  transform: rotate(1.5deg);
+}
 .card:hover,
 .card:focus-visible {
-  background: var(--holo);
-  transform: translateY(-3px) rotate(-0.6deg);
-}
-.card:nth-of-type(2):hover,
-.card:nth-of-type(2):focus-visible {
-  transform: translateY(-3px) rotate(0.6deg);
+  transform: translateY(-4px) rotate(0deg);
 }
 .card:active {
-  transform: scale(0.98);
+  transform: scale(0.97);
 }
 .card:focus-visible {
-  outline: 3px solid var(--accent);
+  outline: 3px solid var(--text);
   outline-offset: 3px;
 }
-.photo {
-  border-radius: 12px;
+.tape {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  z-index: 1;
+  width: 42%;
+  height: 16px;
+  background: var(--tape-1);
+  opacity: 0.92;
+  transform: translateX(-50%) rotate(-3deg);
 }
-/* Lift the initials fallback clear of the caption. */
-.photo.avatar--initials {
-  padding-bottom: 22%;
+.card--right .tape {
+  background: var(--tape-2);
+  transform: translateX(-50%) rotate(2deg);
+}
+.photo {
+  border-radius: 9px;
 }
 .caption {
-  position: absolute;
-  right: 7px;
-  bottom: 7px;
-  left: 7px;
   display: flex;
   flex-direction: column;
-  padding: 2.5rem 0.85rem 0.8rem;
-  border-radius: 0 0 12px 12px;
-  /* Stays dark behind the text so white type reads on light photos too. */
-  background: linear-gradient(
-    to top,
-    rgb(12 10 28 / 0.88) 0%,
-    rgb(12 10 28 / 0.72) 65%,
-    rgb(12 10 28 / 0) 100%
-  );
-  color: #fff;
-  text-shadow: 0 1px 2px rgb(12 10 28 / 0.6);
+  min-width: 0;
+  padding: 0.55rem 0.3rem 0;
 }
 .name {
   overflow: hidden;
   font-family: var(--font-display);
-  font-size: 1.3rem;
-  font-weight: 700;
-  line-height: 1.15;
-  letter-spacing: -0.01em;
+  font-size: 1.2rem;
+  line-height: 1.2;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 .group {
   overflow: hidden;
+  color: var(--muted);
   font-size: 0.85rem;
   font-weight: 500;
-  opacity: 0.85;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 .hint {
   position: absolute;
-  top: 15px;
-  right: 15px;
+  right: 12px;
+  bottom: 12px;
   display: grid;
   place-items: center;
   min-width: 1.6rem;
   height: 1.6rem;
   padding: 0 0.35rem;
+  border: 1px solid var(--border);
   border-radius: 6px;
-  background: rgb(12 10 28 / 0.55);
-  color: #fff;
+  color: var(--muted);
   font-family: var(--font-body);
-  font-size: 0.85rem;
-  backdrop-filter: blur(4px);
+  font-size: 0.8rem;
 }
 @media (max-width: 559px) {
   .card {
-    padding: 5px;
-    border-radius: 14px;
+    padding: 5px 5px 8px;
+    border-radius: 11px;
   }
   .photo {
-    border-radius: 10px;
+    border-radius: 7px;
   }
   .caption {
-    right: 5px;
-    bottom: 5px;
-    left: 5px;
-    padding: 1.75rem 0.55rem 0.55rem;
-    border-radius: 0 0 10px 10px;
+    padding: 0.4rem 0.2rem 0;
   }
   .name {
     font-size: 0.95rem;
   }
   .group {
     font-size: 0.75rem;
+  }
+  .tape {
+    height: 12px;
+    top: -6px;
   }
 }
 @media (hover: none) {
@@ -152,10 +151,7 @@ defineEmits(['pick'])
   .card,
   .card:hover,
   .card:focus-visible,
-  .card:nth-of-type(2):hover,
-  .card:nth-of-type(2):focus-visible,
   .card:active {
-    transform: none;
     transition: none;
   }
 }
