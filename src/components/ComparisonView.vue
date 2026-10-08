@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue'
 import { useRankingStore } from '../stores/ranking.js'
 import IdolCard from './IdolCard.vue'
 import AppIcon from './AppIcon.vue'
@@ -8,25 +8,65 @@ const store = useRankingStore()
 defineEmits(['show-results'])
 
 // Visual only: after a pick or skip, the pair that was just answered stays on top for a beat
-// while a sticker stamps onto the chosen card (both cards on a skip), then the cards flip over
-// to the next pair, like turning photocards. Cards stay opaque, so two faces never blend.
-// The store is updated immediately, exactly as before.
+// (a sticker stamps onto the picked card; nothing on a skip), then the cards flip over to the
+// next pair, like turning photocards. Cards stay opaque, so two faces never blend. The store
+// is updated immediately; the flash only delays what the user sees, never what gets recorded.
+const HOLD_MS = 500 // sticker lands and holds
+const FLIP_MS = 180 // each half of the flip (out, then in)
+const STAGGER_MS = 40 // right card trails the left
+const FLASH_MS = HOLD_MS + STAGGER_MS + FLIP_MS
+const timing = {
+  '--hold': `${HOLD_MS}ms`,
+  '--flip': `${FLIP_MS}ms`,
+  '--stagger': `${STAGGER_MS}ms`,
+}
+
+const pairEl = ref(null)
 const flash = ref(null)
-const revealId = ref(0)
+const revealing = ref(false)
 let flashId = 0
-const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
-function stampAndRun(side, action) {
-  const answered = store.pair
-  action()
-  if (answered && !reduceMotion.matches) flash.value = { id: ++flashId, pair: answered, side }
+let flashTimer = 0
+let refocusSide = null
+
+function focusedSide() {
+  const cards = pairEl.value ? [...pairEl.value.querySelectorAll('.card')] : []
+  const i = cards.indexOf(document.activeElement)
+  return i === 0 ? 'left' : i === 1 ? 'right' : null
 }
-function endFlash() {
+
+// Ends the flash and shows the real pair, flipping it in.
+async function endFlash() {
+  if (!flash.value) return
+  clearTimeout(flashTimer)
   flash.value = null
-  revealId.value++
+  revealing.value = false
+  const side = refocusSide
+  refocusSide = null
+  await nextTick()
+  requestAnimationFrame(() => (revealing.value = true))
+  // Hidden cards lose focus, so put it back on the same side (keyboard users).
+  if (side) pairEl.value?.querySelectorAll('.card')[side === 'left' ? 0 : 1]?.focus()
 }
-const pick = (side) => stampAndRun(side, () => store.pick(side))
-const skip = () => stampAndRun('both', () => store.skip())
-const stamped = (side) => flash.value && (flash.value.side === side || flash.value.side === 'both')
+
+function answer(side, action) {
+  // While the flash shows, the next pair is hidden: ignore picks and skips so input only ever
+  // counts for a pair the user can see.
+  if (flash.value) return
+  const answered = store.pair
+  const hadFocus = focusedSide()
+  action()
+  if (!answered || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+  refocusSide = hadFocus
+  flash.value = { id: ++flashId, pair: answered, side }
+  flashTimer = setTimeout(endFlash, FLASH_MS)
+}
+const pick = (side) => answer(side, () => store.pick(side))
+const skip = () => answer('none', () => store.skip())
+function undo() {
+  endFlash()
+  store.undo()
+}
+const stamped = (side) => flash.value?.side === side
 
 // ← picks left, → picks right, ↓ or S skips (R2).
 function onKeydown(e) {
@@ -39,15 +79,18 @@ function onKeydown(e) {
 }
 
 onMounted(() => window.addEventListener('keydown', onKeydown))
-onUnmounted(() => window.removeEventListener('keydown', onKeydown))
-
-const milestone = computed(() => {
-  const ratio = store.decisions / store.target
-  if (ratio >= 1) return 'Extra picks make it even sharper'
-  if (ratio >= 0.85) return 'Almost done'
-  if (ratio >= 0.5) return 'Halfway there'
-  return 'Tap the one you like more'
+onUnmounted(() => {
+  window.removeEventListener('keydown', onKeydown)
+  clearTimeout(flashTimer)
 })
+
+const MILESTONES = {
+  start: 'Tap the one you like more',
+  half: 'Halfway there',
+  almost: 'Almost done',
+  ready: 'Extra picks make it even sharper',
+}
+const milestone = computed(() => MILESTONES[store.stage])
 </script>
 
 <template>
@@ -81,24 +124,17 @@ const milestone = computed(() => {
       <button type="button" class="cta" @click="$emit('show-results')">See my ranking</button>
     </div>
 
-    <div v-if="store.pair" class="stage">
+    <div v-if="store.pair" class="stage" :style="timing">
       <div
-        :key="revealId"
+        ref="pairEl"
         class="pair"
-        :class="{ 'pair--waiting': flash, 'pair--reveal': revealId }"
+        :class="{ 'pair--waiting': flash, 'pair--reveal': revealing }"
       >
         <IdolCard :idol="store.pair[0]" side="left" key-hint="←" @pick="pick('left')" />
         <IdolCard :idol="store.pair[1]" side="right" key-hint="→" @pick="pick('right')" />
       </div>
 
-      <div
-        v-if="flash"
-        :key="flash.id"
-        class="flash pair"
-        aria-hidden="true"
-        inert
-        @animationend.self="endFlash"
-      >
+      <div v-if="flash" :key="flash.id" class="flash pair" aria-hidden="true" inert>
         <div
           v-for="(side, i) in ['left', 'right']"
           :key="side"
@@ -107,7 +143,7 @@ const milestone = computed(() => {
         >
           <IdolCard :idol="flash.pair[i]" :side="side" />
           <span v-if="stamped(side)" class="stamp">
-            <AppIcon :name="flash.side === 'both' ? 'heart' : 'sparkle'" :size="64" />
+            <AppIcon name="sparkle" :size="64" />
           </span>
         </div>
       </div>
@@ -115,13 +151,13 @@ const milestone = computed(() => {
 
     <div class="controls">
       <button type="button" class="control" aria-keyshortcuts="S" @click="skip()">
-        I love them both <kbd aria-hidden="true">S</kbd>
+        I can't choose <kbd aria-hidden="true">S</kbd>
       </button>
       <button
         type="button"
         class="control"
         :disabled="store.comparisons.length === 0"
-        @click="store.undo()"
+        @click="undo()"
       >
         <AppIcon name="undo" :size="16" />
         Undo
@@ -218,29 +254,21 @@ const milestone = computed(() => {
 
 /* The answered pair, held fully opaque on top while the sticker lands, then flipped away
    edge-on. The next pair waits hidden and flips in from the other edge. No opacity fades:
-   a cross-fade would blend two idols' faces. */
+   a cross-fade would blend two idols' faces. Timing comes from the --hold / --flip /
+   --stagger variables set in the script (the same numbers end the flash). */
 .flash {
   position: absolute;
   inset: 8px 0 auto;
   z-index: 2;
   pointer-events: none;
   perspective: 900px;
-  animation: flash-hold 0.74s linear forwards;
-}
-@keyframes flash-hold {
-  from {
-    transform: none;
-  }
-  to {
-    transform: none;
-  }
 }
 .flash__slot {
   position: relative;
-  animation: flip-out 0.16s ease-in 0.52s forwards;
+  animation: flip-out var(--flip) ease-in var(--hold) forwards;
 }
 .flash__slot:nth-child(2) {
-  animation-delay: 0.56s;
+  animation-delay: calc(var(--hold) + var(--stagger));
 }
 @keyframes flip-out {
   to {
@@ -254,10 +282,10 @@ const milestone = computed(() => {
   perspective: 900px;
 }
 .pair--reveal > :deep(*) {
-  animation: flip-in 0.18s ease-out backwards;
+  animation: flip-in var(--flip) ease-out backwards;
 }
 .pair--reveal > :deep(:nth-child(2)) {
-  animation-delay: 0.04s;
+  animation-delay: var(--stagger);
 }
 @keyframes flip-in {
   from {
@@ -267,12 +295,12 @@ const milestone = computed(() => {
 .flash__slot--chosen {
   animation:
     thump 0.45s ease-out,
-    flip-out 0.16s ease-in 0.52s forwards;
+    flip-out var(--flip) ease-in var(--hold) forwards;
 }
 .flash__slot--chosen:nth-child(2) {
   animation:
     thump 0.45s ease-out,
-    flip-out 0.16s ease-in 0.56s forwards;
+    flip-out var(--flip) ease-in calc(var(--hold) + var(--stagger)) forwards;
 }
 @keyframes thump {
   0%,

@@ -40,10 +40,14 @@ function confirmReset() {
   <section class="results">
     <h2 class="headline">Your top picks</h2>
 
-    <p class="help">
-      You know exactly who you love. These are the idols you kept choosing across your
+    <p v-if="store.isProvisional" class="help">
+      Your favorites are taking shape. Here's who's leading after your
       {{ store.decisions }} {{ store.decisions === 1 ? 'pick' : 'picks' }}, each with her
       <strong>Goddess Score</strong>.
+    </p>
+    <p v-else class="help">
+      You know exactly who you love. These are the idols you kept choosing across your
+      {{ store.decisions }} picks, each with her <strong>Goddess Score</strong>.
     </p>
 
     <p v-if="store.isProvisional" class="banner" role="status">

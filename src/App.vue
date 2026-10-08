@@ -10,9 +10,7 @@ const store = useRankingStore()
 
 // The page background shifts color at progress milestones (start → halfway → almost → ready).
 watchEffect(() => {
-  const ratio = store.decisions / store.target
-  document.documentElement.dataset.stage =
-    ratio >= 1 ? 'ready' : ratio >= 0.85 ? 'almost' : ratio >= 0.5 ? 'half' : 'start'
+  document.documentElement.dataset.stage = store.stage
 })
 </script>
 

@@ -77,6 +77,22 @@ describe('ranking store', () => {
     expect(ids[0] < ids.at(-1)).toBe(true)
   })
 
+  it('stage moves start → half → almost → ready at 50%, 85% and the target', () => {
+    stubStorage()
+    const store = useRankingStore()
+    const stageAfter = {}
+    for (let i = 1; i <= 27; i++) {
+      store.pick('left')
+      stageAfter[i] = store.stage
+    }
+    expect(stageAfter[13]).toBe('start')
+    expect(stageAfter[14]).toBe('half')
+    expect(stageAfter[22]).toBe('half')
+    expect(stageAfter[23]).toBe('almost')
+    expect(stageAfter[26]).toBe('almost')
+    expect(stageAfter[27]).toBe('ready')
+  })
+
   it('undo removes the last pick, saves, and shows that pair again (P1-1)', () => {
     const data = stubStorage()
     const store = useRankingStore()
