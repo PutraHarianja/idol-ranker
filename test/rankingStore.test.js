@@ -42,14 +42,32 @@ describe('ranking store', () => {
     expect(JSON.parse(data[KEY]).comparisons).toHaveLength(1)
   })
 
-  it('skip records nothing but changes the pair (R4)', () => {
-    stubStorage()
+  it('tie records the pair as a tie, saves, counts as a decision and changes the pair (P1-3)', () => {
+    const data = stubStorage()
     const store = useRankingStore()
     const before = store.pair.map((idol) => idol.id)
-    store.skip()
+    store.tie()
+    expect(store.comparisons.at(-1)).toMatchObject({ outcome: 'tie' })
+    expect(new Set([store.comparisons[0].winnerId, store.comparisons[0].loserId])).toEqual(
+      new Set(before),
+    )
+    expect(store.decisions).toBe(1)
+    expect(before.every((id) => store.appearances.get(id) === 1)).toBe(true)
+    expect(JSON.parse(data[KEY]).comparisons[0].outcome).toBe('tie')
     const after = store.pair.map((idol) => idol.id)
-    expect(store.decisions).toBe(0)
     expect(after.includes(before[0]) && after.includes(before[1])).toBe(false)
+  })
+
+  it('a tie gives both idols the same score, and undo removes it', () => {
+    stubStorage()
+    const store = useRankingStore()
+    const tied = store.pair.map((idol) => idol.id)
+    store.tie()
+    const score = (id) => store.ranking.find((r) => r.id === id).score
+    expect(score(tied[0])).toBe(score(tied[1]))
+    store.undo()
+    expect(store.decisions).toBe(0)
+    expect(new Set(store.pair.map((idol) => idol.id))).toEqual(new Set(tied))
   })
 
   it('restores progress from storage and ignores unknown idols in the count', () => {

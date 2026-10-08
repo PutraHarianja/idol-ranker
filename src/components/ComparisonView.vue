@@ -49,7 +49,7 @@ async function endFlash() {
 }
 
 function answer(side, action) {
-  // While the flash shows, the next pair is hidden: ignore picks and skips so input only ever
+  // While the flash shows, the next pair is hidden: ignore picks and ties so input only ever
   // counts for a pair the user can see.
   if (flash.value) return
   const answered = store.pair
@@ -61,19 +61,19 @@ function answer(side, action) {
   flashTimer = setTimeout(endFlash, FLASH_MS)
 }
 const pick = (side) => answer(side, () => store.pick(side))
-const skip = () => answer('none', () => store.skip())
+const tie = () => answer('tie', () => store.tie())
 function undo() {
   endFlash()
   store.undo()
 }
 const stamped = (side) => flash.value?.side === side
 
-// ← picks left, → picks right, ↓ or S skips (R2).
+// ← picks left, → picks right, ↓ or S calls it a tie (R2, P1-3).
 function onKeydown(e) {
   if (e.repeat || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return
   if (e.key === 'ArrowLeft') pick('left')
   else if (e.key === 'ArrowRight') pick('right')
-  else if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') skip()
+  else if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') tie()
   else return
   e.preventDefault()
 }
@@ -150,8 +150,8 @@ const milestone = computed(() => MILESTONES[store.stage])
     </div>
 
     <div class="controls">
-      <button type="button" class="control" aria-keyshortcuts="S" @click="skip()">
-        I can't choose <kbd aria-hidden="true">S</kbd>
+      <button type="button" class="control" aria-keyshortcuts="S" @click="tie()">
+        Too close to call <kbd aria-hidden="true">S</kbd>
       </button>
       <button
         type="button"
