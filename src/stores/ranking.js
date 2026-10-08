@@ -24,6 +24,14 @@ export const useRankingStore = defineStore('ranking', () => {
   const decisions = computed(() => validComparisons.value.length)
   const target = comparisonTarget(idolIds.length)
   const isReady = computed(() => decisions.value >= target)
+  /** Progress milestone for the UI: 'start' → 'half' (50%) → 'almost' (85%) → 'ready' (target). */
+  const stage = computed(() => {
+    const ratio = decisions.value / target
+    if (ratio >= 1) return 'ready'
+    if (ratio >= 0.85) return 'almost'
+    if (ratio >= 0.5) return 'half'
+    return 'start'
+  })
   const appearances = computed(() => countAppearances(idolIds, validComparisons.value))
   const isProvisional = computed(() =>
     [...appearances.value.values()].some((n) => n < MIN_APPEARANCES),
@@ -95,6 +103,7 @@ export const useRankingStore = defineStore('ranking', () => {
     decisions,
     target,
     isReady,
+    stage,
     appearances,
     isProvisional,
     ranking,

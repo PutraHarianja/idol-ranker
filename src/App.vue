@@ -1,16 +1,28 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, watchEffect } from 'vue'
+import { useRankingStore } from './stores/ranking.js'
 import ComparisonView from './components/ComparisonView.vue'
 import ResultsView from './components/ResultsView.vue'
 import CreditsView from './components/CreditsView.vue'
 
 const view = ref('compare')
+const store = useRankingStore()
+
+// The page background shifts color at progress milestones (start → halfway → almost → ready).
+watchEffect(() => {
+  document.documentElement.dataset.stage = store.stage
+})
 </script>
 
 <template>
   <div class="app">
     <header class="header">
-      <h1 class="title">👑 Idol Ranker</h1>
+      <h1 class="title">
+        <svg class="title__mark" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 2.5 13.9 10l7.6 2-7.6 2L12 21.5 10.1 14l-7.6-2 7.6-2z" />
+        </svg>
+        Idol Ranker
+      </h1>
       <nav class="tabs">
         <button
           type="button"
@@ -18,7 +30,7 @@ const view = ref('compare')
           :aria-current="view === 'compare' ? 'page' : undefined"
           @click="view = 'compare'"
         >
-          Compare
+          Pick
         </button>
         <button
           type="button"
@@ -26,7 +38,7 @@ const view = ref('compare')
           :aria-current="view === 'results' ? 'page' : undefined"
           @click="view = 'results'"
         >
-          Results
+          My ranking
         </button>
       </nav>
     </header>
@@ -45,33 +57,61 @@ const view = ref('compare')
 </template>
 
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Figtree:wght@400;500;600;700&display=swap');
+
 :root {
-  --bg: #faf8fc;
+  --bg: #d6e4f5;
   --surface: #ffffff;
-  --text: #1f1a24;
-  --muted: #6b6372;
-  --border: #e4dfe9;
-  --accent: #b5179e;
-  --accent-soft: #f8e1f4;
+  --text: #172a55;
+  --muted: #4b5b80;
+  --border: #b9cbe3;
+  --accent: #d92e46;
+  --on-accent: #ffffff;
+  --accent-soft: #ffffff;
+  --tape-1: #f5c542;
+  --tape-2: #86d1b0;
   --warn-soft: #fff4d6;
   --warn-text: #6b4e00;
-  --danger: #c92a2a;
-  --radius: 10px;
+  --danger: #b42318;
+  --radius: 12px;
+  --shadow: 0 1px 0 rgb(23 42 85 / 0.08), 0 10px 24px -14px rgb(23 42 85 / 0.45);
+  --font-display: 'Dela Gothic One', 'Arial Black', system-ui, sans-serif;
+  --font-body: 'Figtree', system-ui, -apple-system, 'Segoe UI', sans-serif;
   color-scheme: light;
+}
+:root[data-stage='half'] {
+  --bg: #d3ede2;
+}
+:root[data-stage='almost'] {
+  --bg: #f8e9c2;
+}
+:root[data-stage='ready'] {
+  --bg: #f9dce0;
 }
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #141118;
-    --surface: #1e1a23;
-    --text: #f1edf5;
-    --muted: #a59dae;
-    --border: #342e3b;
-    --accent: #e05dc9;
-    --accent-soft: #3a1f36;
+    --bg: #101b38;
+    --surface: #1b2850;
+    --text: #eef2fa;
+    --muted: #a9b4d0;
+    --border: #2f3d68;
+    --accent: #ff5a6e;
+    --on-accent: #101b38;
+    --accent-soft: #1b2850;
     --warn-soft: #3a2f12;
     --warn-text: #f5d98b;
-    --danger: #ff6b6b;
+    --danger: #ff8a80;
+    --shadow: 0 1px 0 rgb(0 0 0 / 0.3), 0 12px 28px -14px rgb(0 0 0 / 0.8);
     color-scheme: dark;
+  }
+  :root[data-stage='half'] {
+    --bg: #10292a;
+  }
+  :root[data-stage='almost'] {
+    --bg: #2a2414;
+  }
+  :root[data-stage='ready'] {
+    --bg: #33171f;
   }
 }
 * {
@@ -81,67 +121,102 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
-  font-family:
-    system-ui,
-    -apple-system,
-    'Segoe UI',
-    sans-serif;
-  line-height: 1.4;
+  font-family: var(--font-body);
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.6s ease;
 }
 .app {
   max-width: 720px;
   margin: 0 auto;
-  padding: 1rem 16px 2rem;
+  padding: 1.25rem 16px 2.5rem;
 }
 .header {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 0.5rem;
+  gap: 0.75rem;
   margin-bottom: 1.25rem;
 }
 .title {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
   margin: 0;
-  font-size: 1.4rem;
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 400;
+}
+.title__mark {
+  width: 1.25rem;
+  height: 1.25rem;
+  fill: var(--accent);
+  stroke: var(--text);
+  stroke-width: 1.2;
+  stroke-linejoin: round;
 }
 .tabs {
   display: flex;
-  gap: 0.25rem;
-  padding: 0.2rem;
+  gap: 0.2rem;
+  padding: 0.25rem;
   border-radius: 999px;
-  background: var(--border);
+  background: var(--surface);
+  box-shadow: var(--shadow);
 }
 .tabs button {
-  padding: 0.35rem 0.9rem;
+  padding: 0.4rem 1rem;
   border: none;
   border-radius: 999px;
   background: transparent;
-  color: var(--text);
+  color: var(--muted);
   font: inherit;
+  font-weight: 600;
   cursor: pointer;
 }
+.tabs button:hover {
+  color: var(--text);
+}
 .tabs button.active {
-  background: var(--surface);
-  font-weight: 600;
+  background: var(--text);
+  color: var(--surface);
+}
+@media (pointer: coarse) {
+  .tabs button {
+    min-height: 44px;
+  }
+}
+.tabs button:focus-visible,
+.link:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
 }
 .footer {
-  margin-top: 2rem;
+  margin-top: 2.5rem;
   color: var(--muted);
   font-size: 0.8rem;
   text-align: center;
 }
 .footer .link {
   font-size: inherit;
-  font-weight: 400;
+  font-weight: 500;
 }
 .link {
+  padding: 0;
   border: none;
   background: none;
-  color: var(--accent);
+  color: var(--text);
   font: inherit;
   font-weight: 600;
   text-decoration: underline;
+  text-decoration-color: var(--accent);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.2em;
   cursor: pointer;
+}
+@media (prefers-reduced-motion: reduce) {
+  body {
+    transition: none;
+  }
 }
 </style>

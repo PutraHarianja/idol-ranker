@@ -47,17 +47,24 @@ const LICENSE_URLS = {
 
 <style scoped>
 h2 {
-  margin: 0 0 0.25rem;
-  font-size: 1.2rem;
+  margin: 0 0 0.35rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 6vw, 2rem);
+  font-weight: 400;
+  line-height: 1.1;
 }
 .intro {
-  margin: 0 0 1rem;
+  max-width: 60ch;
+  margin: 0 0 1.25rem;
   color: var(--muted);
   font-size: 0.9rem;
 }
 .list {
-  margin: 0 0 1rem;
-  padding: 0;
+  margin: 0 0 1.25rem;
+  padding: 0.25rem 1rem;
+  border-radius: 20px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
   list-style: none;
 }
 .row {
@@ -65,8 +72,11 @@ h2 {
   grid-template-columns: 40px 1fr;
   align-items: center;
   gap: 0.75rem;
-  padding: 0.5rem 0;
+  padding: 0.6rem 0;
   border-bottom: 1px solid var(--border);
+}
+.row:last-child {
+  border-bottom: none;
 }
 .thumb {
   font-size: 1rem;
@@ -78,7 +88,7 @@ h2 {
   min-width: 0;
 }
 .name {
-  font-weight: 600;
+  font-weight: 700;
 }
 .group {
   color: var(--muted);
@@ -90,15 +100,25 @@ h2 {
   overflow-wrap: anywhere;
 }
 a {
-  color: var(--accent);
+  color: var(--text);
+  text-decoration-color: var(--accent);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.15em;
 }
 .back {
-  padding: 0.55rem 1.1rem;
-  border: 1px solid var(--border);
+  min-height: 44px;
+  padding: 0.6rem 1.2rem;
+  border: none;
   border-radius: 999px;
-  background: transparent;
+  background: var(--surface);
+  box-shadow: var(--shadow);
   color: var(--text);
   font: inherit;
+  font-weight: 700;
   cursor: pointer;
+}
+.back:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
 }
 </style>
