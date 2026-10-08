@@ -8,7 +8,7 @@ const store = useRankingStore()
 defineEmits(['show-results'])
 
 // Visual only: after a pick or skip, the pair that was just answered stays on top for a beat
-// (a sticker stamps onto the picked card; nothing on a skip), then the cards flip over to the
+// (a sticker stamps onto the picked card, or one shared sticker across the gap on a tie), then the cards flip over to the
 // next pair, like turning photocards. Cards stay opaque, so two faces never blend. The store
 // is updated immediately; the flash only delays what the user sees, never what gets recorded.
 const HOLD_MS = 500 // sticker lands and holds
@@ -146,6 +146,9 @@ const milestone = computed(() => MILESTONES[store.stage])
             <AppIcon name="sparkle" :size="64" />
           </span>
         </div>
+        <span v-if="flash.side === 'tie'" class="stamp stamp--tie">
+          <AppIcon name="sparkle" :size="64" />
+        </span>
       </div>
     </div>
 
@@ -327,6 +330,20 @@ const milestone = computed(() => MILESTONES[store.stage])
   filter: drop-shadow(0 3px 0 var(--text));
   animation: stamp 0.45s cubic-bezier(0.2, 0.8, 0.3, 1.2) both;
 }
+/* Tie: one sticker centered on the gap between the cards, shrinking away as they flip. */
+.flash > .stamp--tie {
+  left: 50%;
+  right: auto;
+  margin-left: -32px;
+  animation:
+    stamp 0.45s cubic-bezier(0.2, 0.8, 0.3, 1.2) both,
+    stamp-out var(--flip) ease-in var(--hold) forwards;
+}
+@keyframes stamp-out {
+  to {
+    transform: scale(0);
+  }
+}
 @keyframes stamp {
   0% {
     opacity: 0;
@@ -397,6 +414,10 @@ const milestone = computed(() => MILESTONES[store.stage])
   .stamp :deep(svg) {
     width: 48px;
     height: 48px;
+  }
+  .flash > .stamp--tie {
+    right: auto;
+    margin-left: -24px;
   }
 }
 @media (hover: none) {
