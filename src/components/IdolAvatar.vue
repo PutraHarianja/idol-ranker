@@ -6,6 +6,9 @@ const props = defineProps({
   idol: { type: Object, required: true },
 })
 
+// Photo paths are stored root-relative ('/idols/x.jpg'); the site is served under a base path.
+const baseUrl = import.meta.env.BASE_URL
+
 // Falls back to initials when there's no photo or it fails to load (R10).
 const failed = ref(false)
 watch(() => props.idol.id, () => (failed.value = false))
@@ -25,7 +28,7 @@ const initials = computed(() =>
   <img
     v-if="showPhoto"
     class="avatar"
-    :src="idol.image.src"
+    :src="`${baseUrl}${idol.image.src.slice(1)}`"
     :alt="idol.name"
     @error="failed = true"
   />
