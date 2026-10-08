@@ -9,7 +9,7 @@
 
 /**
  * @param {string[]} idolIds
- * @param {{ winnerId: string, loserId: string }[]} comparisons
+ * @param {{ winnerId: string, loserId: string, outcome?: 'tie' }[]} comparisons
  * @returns {{ id: string, strength: number }[]} sorted by strength, descending
  */
 export function fitBradleyTerry(
@@ -24,12 +24,18 @@ export function fitBradleyTerry(
   // games[i][j] = number of real comparisons between i and j
   const games = Array.from({ length: n }, () => new Array(n).fill(0))
 
-  for (const { winnerId, loserId } of comparisons) {
+  for (const { winnerId, loserId, outcome } of comparisons) {
     const w = index.get(winnerId)
     const l = index.get(loserId)
     // Ignore ids no longer in the dataset (R8) and malformed self-comparisons.
     if (w === undefined || l === undefined || w === l) continue
-    wins[w]++
+    // A tie (P1-3) is one game with half a win to each idol; the id order means nothing.
+    if (outcome === 'tie') {
+      wins[w] += 0.5
+      wins[l] += 0.5
+    } else {
+      wins[w]++
+    }
     games[w][l]++
     games[l][w]++
   }

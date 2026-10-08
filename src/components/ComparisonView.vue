@@ -8,7 +8,7 @@ const store = useRankingStore()
 defineEmits(['show-results'])
 
 // Visual only: after a pick or skip, the pair that was just answered stays on top for a beat
-// (a sticker stamps onto the picked card; nothing on a skip), then the cards flip over to the
+// (a sticker stamps onto the picked card, or one shared sticker across the gap on a tie), then the cards flip over to the
 // next pair, like turning photocards. Cards stay opaque, so two faces never blend. The store
 // is updated immediately; the flash only delays what the user sees, never what gets recorded.
 const HOLD_MS = 500 // sticker lands and holds
@@ -49,7 +49,7 @@ async function endFlash() {
 }
 
 function answer(side, action) {
-  // While the flash shows, the next pair is hidden: ignore picks and skips so input only ever
+  // While the flash shows, the next pair is hidden: ignore picks and ties so input only ever
   // counts for a pair the user can see.
   if (flash.value) return
   const answered = store.pair
@@ -61,19 +61,19 @@ function answer(side, action) {
   flashTimer = setTimeout(endFlash, FLASH_MS)
 }
 const pick = (side) => answer(side, () => store.pick(side))
-const skip = () => answer('none', () => store.skip())
+const tie = () => answer('tie', () => store.tie())
 function undo() {
   endFlash()
   store.undo()
 }
 const stamped = (side) => flash.value?.side === side
 
-// ← picks left, → picks right, ↓ or S skips (R2).
+// ← picks left, → picks right, ↓ or S calls it a tie (R2, P1-3).
 function onKeydown(e) {
   if (e.repeat || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return
   if (e.key === 'ArrowLeft') pick('left')
   else if (e.key === 'ArrowRight') pick('right')
-  else if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') skip()
+  else if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') tie()
   else return
   e.preventDefault()
 }
@@ -146,12 +146,15 @@ const milestone = computed(() => MILESTONES[store.stage])
             <AppIcon name="sparkle" :size="64" />
           </span>
         </div>
+        <span v-if="flash.side === 'tie'" class="stamp stamp--tie">
+          <AppIcon name="sparkle" :size="64" />
+        </span>
       </div>
     </div>
 
     <div class="controls">
-      <button type="button" class="control" aria-keyshortcuts="S" @click="skip()">
-        I can't choose <kbd aria-hidden="true">S</kbd>
+      <button type="button" class="control" aria-keyshortcuts="S" @click="tie()">
+        Too close to call <kbd aria-hidden="true">S</kbd>
       </button>
       <button
         type="button"
@@ -327,6 +330,20 @@ const milestone = computed(() => MILESTONES[store.stage])
   filter: drop-shadow(0 3px 0 var(--text));
   animation: stamp 0.45s cubic-bezier(0.2, 0.8, 0.3, 1.2) both;
 }
+/* Tie: one sticker centered on the gap between the cards, shrinking away as they flip. */
+.flash > .stamp--tie {
+  left: 50%;
+  right: auto;
+  margin-left: -32px;
+  animation:
+    stamp 0.45s cubic-bezier(0.2, 0.8, 0.3, 1.2) both,
+    stamp-out var(--flip) ease-in var(--hold) forwards;
+}
+@keyframes stamp-out {
+  to {
+    transform: scale(0);
+  }
+}
 @keyframes stamp {
   0% {
     opacity: 0;
@@ -397,6 +414,10 @@ const milestone = computed(() => MILESTONES[store.stage])
   .stamp :deep(svg) {
     width: 48px;
     height: 48px;
+  }
+  .flash > .stamp--tie {
+    right: auto;
+    margin-left: -24px;
   }
 }
 @media (hover: none) {

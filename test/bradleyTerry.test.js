@@ -53,6 +53,44 @@ describe('fitBradleyTerry (R5)', () => {
     expect(result.at(-1).id).toBe(ids18[0])
   })
 
+  describe('ties (P1-3)', () => {
+    const tieOf = (a, b, times = 1) =>
+      Array.from({ length: times }, () => ({ winnerId: a, loserId: b, timestamp: 0, outcome: 'tie' }))
+    const strengthsOf = (ids, log) =>
+      Object.fromEntries(fitBradleyTerry(ids, log).map((r) => [r.id, r.strength]))
+
+    it('only ties leave everyone tied at strength 1', () => {
+      const s = strengthsOf(['A', 'B', 'C'], [...tieOf('A', 'B', 3), ...tieOf('B', 'C', 2)])
+      for (const v of Object.values(s)) expect(v).toBeCloseTo(1, 6)
+    })
+
+    it('pulls two idols toward each other instead of raising both', () => {
+      const ids = ['A', 'B', 'C']
+      const base = [...beat('A', 'B', 3), ...beat('A', 'C', 1), ...beat('C', 'B', 1)]
+      const before = strengthsOf(ids, base)
+      const after = strengthsOf(ids, [...base, ...tieOf('A', 'B', 3)])
+      expect(after.A / after.B).toBeLessThan(before.A / before.B)
+      expect(after.A).toBeLessThan(before.A)
+      expect(after.B).toBeGreaterThan(before.B)
+    })
+
+    it('ignores the order of the two ids in a tie', () => {
+      const ids = ['A', 'B', 'C']
+      const base = [...beat('A', 'C', 2), ...beat('C', 'B', 1)]
+      expect(fitBradleyTerry(ids, [...base, ...tieOf('A', 'B', 2)])).toEqual(
+        fitBradleyTerry(ids, [...base, ...tieOf('B', 'A', 2)]),
+      )
+    })
+
+    it('counts a tie as half a win each: one tie equals one win each way', () => {
+      const ids = ['A', 'B', 'C']
+      const base = [...beat('A', 'C', 2), ...beat('C', 'B', 1)]
+      const withTies = strengthsOf(ids, [...base, ...tieOf('A', 'B', 2)])
+      const withSplit = strengthsOf(ids, [...base, ...beat('A', 'B'), ...beat('B', 'A')])
+      for (const id of ids) expect(withTies[id]).toBeCloseTo(withSplit[id], 9)
+    })
+  })
+
   it('ignores comparisons with unknown ids or self-comparisons', () => {
     const log = [...beat('A', 'B', 2), ...beat('ghost', 'A', 50), ...beat('B', 'B', 50)]
     const clean = fitBradleyTerry(['A', 'B'], beat('A', 'B', 2))

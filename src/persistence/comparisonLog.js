@@ -21,7 +21,8 @@ function isComparison(entry) {
     entry !== null &&
     typeof entry === 'object' &&
     typeof entry.winnerId === 'string' &&
-    typeof entry.loserId === 'string'
+    typeof entry.loserId === 'string' &&
+    (entry.outcome === undefined || entry.outcome === 'tie')
   )
 }
 

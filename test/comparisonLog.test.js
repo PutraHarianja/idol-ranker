@@ -60,6 +60,15 @@ describe('comparison log persistence (R8)', () => {
     expect(loadComparisons({ storage: fakeStorage(initial) })).toEqual([])
   })
 
+  it('keeps tie entries and old entries without an outcome, drops unknown outcomes (P1-3)', () => {
+    const tie = { winnerId: 'a', loserId: 'b', timestamp: 2, outcome: 'tie' }
+    const odd = { winnerId: 'a', loserId: 'b', timestamp: 3, outcome: 'draw' }
+    const storage = fakeStorage({
+      [KEY]: JSON.stringify({ version: 1, comparisons: [entry, tie, odd] }),
+    })
+    expect(loadComparisons({ storage })).toEqual([entry, tie])
+  })
+
   it('drops malformed entries but keeps valid ones', () => {
     const comparisons = [entry, null, { winnerId: 1, loserId: 'b' }, { winnerId: 'a' }, 'x']
     const storage = fakeStorage({ [KEY]: JSON.stringify({ version: 1, comparisons }) })

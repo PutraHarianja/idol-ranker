@@ -65,8 +65,15 @@ export const useRankingStore = defineStore('ranking', () => {
     nextPair()
   }
 
-  /** Loads a new pair without recording anything (R4). */
-  function skip() {
+  /** Records a tie for the current pair (P1-3: half a win each) and loads the next pair. */
+  function tie() {
+    if (!currentPair.value) return
+    const [a, b] = currentPair.value
+    comparisons.value = [
+      ...comparisons.value,
+      { winnerId: a, loserId: b, timestamp: Date.now(), outcome: 'tie' },
+    ]
+    saveComparisons(comparisons.value)
     nextPair()
   }
 
@@ -108,7 +115,7 @@ export const useRankingStore = defineStore('ranking', () => {
     isProvisional,
     ranking,
     pick,
-    skip,
+    tie,
     undo,
     reset,
   }
