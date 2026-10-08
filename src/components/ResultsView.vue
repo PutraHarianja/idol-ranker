@@ -42,12 +42,15 @@ function confirmReset() {
 
     <p v-if="store.isProvisional" class="help">
       Your favorites are taking shape. Here's who's leading after your
-      {{ store.decisions }} {{ store.decisions === 1 ? 'pick' : 'picks' }}, each with her
-      <strong>Goddess Score</strong>.
+      {{ store.decisions }} {{ store.decisions === 1 ? 'pick' : 'picks' }}.
     </p>
     <p v-else class="help">
       You know exactly who you love. These are the idols you kept choosing across your
-      {{ store.decisions }} picks, each with her <strong>Goddess Score</strong>.
+      {{ store.decisions }} picks.
+    </p>
+    <!-- PRD R6: what the score means, visible without leaving the screen. -->
+    <p class="help score-meaning">
+      <strong>Goddess Score</strong> is how likely you'd pick her over an average idol, out of 100.
     </p>
 
     <p v-if="store.isProvisional" class="banner" role="status">
@@ -314,6 +317,10 @@ function confirmReset() {
 }
 .help strong {
   color: var(--text);
+}
+/* Sits right under the intro line, as one block of text. */
+.score-meaning {
+  margin-top: -0.85rem;
 }
 .actions {
   display: flex;
