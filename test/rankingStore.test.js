@@ -95,6 +95,22 @@ describe('ranking store', () => {
     expect(ids[0] < ids.at(-1)).toBe(true)
   })
 
+  it('announces picks, ties, undo and reaching the target for screen readers (F10)', () => {
+    stubStorage()
+    const store = useRankingStore()
+    const [left, right] = store.pair.map((idol) => idol.name)
+    store.pick('left')
+    expect(store.announcement).toBe(`Picked ${left} over ${right}. 1 of 27.`)
+    store.tie()
+    expect(store.announcement).toBe('Called it a tie. 2 of 27.')
+    store.undo()
+    expect(store.announcement).toBe('Undid your last pick. 1 of 27.')
+    for (let i = 0; i < 25; i++) store.pick('left')
+    expect(store.announcement).toMatch(/^Picked .* over .*\. 26 of 27\.$/)
+    store.pick('left')
+    expect(store.announcement).toBe('27 picks in! You can see your ranking so far.')
+  })
+
   it('stage moves start → half → almost → ready at 50%, 85% and the target', () => {
     stubStorage()
     const store = useRankingStore()

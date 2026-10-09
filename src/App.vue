@@ -8,6 +8,11 @@ import CreditsView from './components/CreditsView.vue'
 const view = ref('compare')
 const store = useRankingStore()
 
+const TITLES = { compare: 'Pick', results: 'My ranking', credits: 'Photo credits' }
+watchEffect(() => {
+  document.title = `${TITLES[view.value]} · Idol Ranker`
+})
+
 // The page background shifts color at progress milestones (start → halfway → almost → ready).
 watchEffect(() => {
   document.documentElement.dataset.stage = store.stage
@@ -42,6 +47,8 @@ watchEffect(() => {
         </button>
       </nav>
     </header>
+
+    <div class="live" role="status" aria-live="polite">{{ store.announcement }}</div>
 
     <main>
       <ComparisonView v-if="view === 'compare'" @show-results="view = 'results'" />
@@ -125,6 +132,14 @@ watchEffect(() => {
   :root[data-stage='ready'] {
     --bg: #33171f;
   }
+}
+.live {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 * {
   box-sizing: border-box;

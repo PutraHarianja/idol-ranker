@@ -97,7 +97,7 @@ const milestone = computed(() => MILESTONES[store.stage])
   <section class="compare">
     <h2 class="headline">Who's your pick?</h2>
 
-    <div class="progress" aria-live="polite">
+    <div class="progress">
       <div class="progress__label">
         <span>{{ milestone }}</span>
         <span class="progress__count">{{ store.decisions }} / {{ store.target }}</span>
