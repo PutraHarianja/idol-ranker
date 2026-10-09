@@ -6,7 +6,7 @@ const props = defineProps({
   idol: { type: Object, required: true },
 })
 
-// Photo paths are stored root-relative ('/idols/x.jpg'); the site is served under a base path.
+// Photo paths are stored root-relative ('/idols/x.webp'); the site is served under a base path.
 const baseUrl = import.meta.env.BASE_URL
 
 // Falls back to initials when there's no photo or it fails to load (R10).
