@@ -119,9 +119,9 @@ const milestone = computed(() => MILESTONES[store.stage])
     <div v-if="store.isReady" class="ready">
       <span class="ready__text">
         <AppIcon name="sparkle" :size="20" class="ready__icon" />
-        Your ranking is ready
+        {{ store.decisions }} picks in!
       </span>
-      <button type="button" class="cta" @click="$emit('show-results')">See my ranking</button>
+      <button type="button" class="cta" @click="$emit('show-results')">See my ranking so far</button>
     </div>
 
     <div v-if="store.pair" class="stage" :style="timing">
