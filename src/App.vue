@@ -186,6 +186,7 @@ body {
   padding: 1.25rem 16px 2.5rem;
 }
 .header {
+  position: relative;
   display: flex;
   flex-wrap: wrap;
   align-items: center;

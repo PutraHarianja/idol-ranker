@@ -153,6 +153,15 @@ watch(
   outline: 2px solid var(--text);
   outline-offset: 2px;
 }
+/* Desktop: float under the Share button so the header row doesn't shift. Phones: it sits beside the tabs. */
+@media (min-width: 560px) {
+  .share-note--ok {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin: 0.3rem 0 0;
+  }
+}
 @keyframes pop {
   from {
     opacity: 0;
