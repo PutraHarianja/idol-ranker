@@ -23,7 +23,7 @@ const ADAPTIVE_CANDIDATES = 3
  * Picks the next pair to show.
  * - First idol: random among those with the fewest appearances.
  * - Second idol: random among the least-seen of the rest, avoiding a repeat of `lastPair`
- *   (either order). With no skips, every idol has exactly 3 appearances after 1.5 × N picks.
+ *   (either order). Among those, idols the first one hasn't been paired with yet come first (F3). With no skips, every idol has exactly 3 appearances after 1.5 × N picks.
  * - Adaptive (P1-2): once every idol has ADAPTIVE_MIN_APPEARANCES and `strengths` is given,
  *   the second idol is instead random among the few closest in strength to the first —
  *   the most informative comparisons.
@@ -56,18 +56,26 @@ export function selectPair(
   const allowed = rest.filter((id) => id !== lastPartner)
   const pool = allowed.length > 0 ? allowed : rest
 
+  const pairedWithFirst = new Set()
+  for (const { winnerId, loserId } of comparisons) {
+    if (winnerId === first) pairedWithFirst.add(loserId)
+    else if (loserId === first) pairedWithFirst.add(winnerId)
+  }
+  // Among equally good candidates, prefer a partner `first` hasn't met yet (F3).
+  const preferFresh = (candidates) => {
+    const fresh = candidates.filter((id) => !pairedWithFirst.has(id))
+    return pickRandom(fresh.length > 0 ? fresh : candidates, random)
+  }
+
   let second
   if (strengths && minCount >= ADAPTIVE_MIN_APPEARANCES) {
     const gap = (id) => Math.abs(Math.log(strengths.get(id) / strengths.get(first)))
     const closest = [...pool].sort((a, b) => gap(a) - gap(b)).slice(0, ADAPTIVE_CANDIDATES)
-    second = pickRandom(closest, random)
+    second = preferFresh(closest)
   } else {
     // Second idol also comes from the least-seen, so appearances stay level.
     const poolMin = Math.min(...pool.map((id) => counts.get(id)))
-    second = pickRandom(
-      pool.filter((id) => counts.get(id) === poolMin),
-      random,
-    )
+    second = preferFresh(pool.filter((id) => counts.get(id) === poolMin))
   }
 
   return random() < 0.5 ? [first, second] : [second, first]

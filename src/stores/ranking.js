@@ -14,6 +14,8 @@ export const useRankingStore = defineStore('ranking', () => {
   const comparisons = ref(loadComparisons())
   const currentPair = ref(null)
   const lastPair = ref(null)
+  // Text for the screen-reader live region (F10). Set after every pick, tie and undo.
+  const announcement = ref('')
 
   // Entries for idols no longer in the dataset are kept in storage but don't count (R8).
   const validComparisons = computed(() =>
@@ -24,6 +26,8 @@ export const useRankingStore = defineStore('ranking', () => {
   const decisions = computed(() => validComparisons.value.length)
   const target = comparisonTarget(idolIds.length)
   const isReady = computed(() => decisions.value >= target)
+  // View to open on at page load: a user who already reached the target lands on their ranking.
+  const startView = isReady.value ? 'results' : 'compare'
   /** Progress milestone for the UI: 'start' → 'half' (50%) → 'almost' (85%) → 'ready' (target). */
   const stage = computed(() => {
     const ratio = decisions.value / target
@@ -46,6 +50,17 @@ export const useRankingStore = defineStore('ranking', () => {
 
   const pair = computed(() => currentPair.value?.map((id) => idolsById.get(id)) ?? null)
 
+  function announce(text) {
+    announcement.value = text
+  }
+  function announceProgress(text) {
+    announce(
+      decisions.value === target
+        ? `${target} picks in! You can see your ranking so far.`
+        : `${text} ${decisions.value} of ${target}.`,
+    )
+  }
+
   function nextPair() {
     lastPair.value = currentPair.value
     const strengths = new Map(ranking.value.map((entry) => [entry.id, entry.strength]))
@@ -62,6 +77,7 @@ export const useRankingStore = defineStore('ranking', () => {
     const [winnerId, loserId] = side === 'left' ? [left, right] : [right, left]
     comparisons.value = [...comparisons.value, { winnerId, loserId, timestamp: Date.now() }]
     saveComparisons(comparisons.value)
+    announceProgress(`Picked ${idolsById.get(winnerId).name} over ${idolsById.get(loserId).name}.`)
     nextPair()
   }
 
@@ -74,6 +90,7 @@ export const useRankingStore = defineStore('ranking', () => {
       { winnerId: a, loserId: b, timestamp: Date.now(), outcome: 'tie' },
     ]
     saveComparisons(comparisons.value)
+    announceProgress('Called it a tie.')
     nextPair()
   }
 
@@ -84,6 +101,7 @@ export const useRankingStore = defineStore('ranking', () => {
     comparisons.value = comparisons.value.slice(0, -1)
     saveComparisons(comparisons.value)
     lastPair.value = null
+    announce(`Undid your last pick. ${decisions.value} of ${target}.`)
     const { winnerId, loserId } = last
     if (idolsById.has(winnerId) && idolsById.has(loserId)) {
       currentPair.value = Math.random() < 0.5 ? [winnerId, loserId] : [loserId, winnerId]
@@ -107,9 +125,11 @@ export const useRankingStore = defineStore('ranking', () => {
     idols,
     comparisons,
     pair,
+    announcement,
     decisions,
     target,
     isReady,
+    startView,
     stage,
     appearances,
     isProvisional,

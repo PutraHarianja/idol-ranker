@@ -1,8 +1,9 @@
 <script setup>
-import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRankingStore } from '../stores/ranking.js'
 import IdolCard from './IdolCard.vue'
 import AppIcon from './AppIcon.vue'
+import { preloadPhotos } from '../preloadPhotos.js'
 
 const store = useRankingStore()
 defineEmits(['show-results'])
@@ -20,6 +21,10 @@ const timing = {
   '--flip': `${FLIP_MS}ms`,
   '--stagger': `${STAGGER_MS}ms`,
 }
+
+// The store picks the next pair the moment a pick is recorded, while the flash is still showing
+// the old one. Start fetching its photos then, so they are ready when the cards flip.
+watch(() => store.pair, preloadPhotos, { immediate: true })
 
 const pairEl = ref(null)
 const flash = ref(null)
@@ -97,7 +102,7 @@ const milestone = computed(() => MILESTONES[store.stage])
   <section class="compare">
     <h2 class="headline">Who's your pick?</h2>
 
-    <div class="progress" aria-live="polite">
+    <div class="progress">
       <div class="progress__label">
         <span>{{ milestone }}</span>
         <span class="progress__count">{{ store.decisions }} / {{ store.target }}</span>
@@ -119,9 +124,9 @@ const milestone = computed(() => MILESTONES[store.stage])
     <div v-if="store.isReady" class="ready">
       <span class="ready__text">
         <AppIcon name="sparkle" :size="20" class="ready__icon" />
-        Your ranking is ready
+        {{ store.decisions }} picks in!
       </span>
-      <button type="button" class="cta" @click="$emit('show-results')">See my ranking</button>
+      <button type="button" class="cta" @click="$emit('show-results')">See my ranking so far</button>
     </div>
 
     <div v-if="store.pair" class="stage" :style="timing">

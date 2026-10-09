@@ -95,6 +95,37 @@ describe('ranking store', () => {
     expect(ids[0] < ids.at(-1)).toBe(true)
   })
 
+  it('announces picks, ties, undo and reaching the target for screen readers (F10)', () => {
+    stubStorage()
+    const store = useRankingStore()
+    const [left, right] = store.pair.map((idol) => idol.name)
+    store.pick('left')
+    expect(store.announcement).toBe(`Picked ${left} over ${right}. 1 of 27.`)
+    store.tie()
+    expect(store.announcement).toBe('Called it a tie. 2 of 27.')
+    store.undo()
+    expect(store.announcement).toBe('Undid your last pick. 1 of 27.')
+    for (let i = 0; i < 25; i++) store.pick('left')
+    expect(store.announcement).toMatch(/^Picked .* over .*\. 26 of 27\.$/)
+    store.pick('left')
+    expect(store.announcement).toBe('27 picks in! You can see your ranking so far.')
+  })
+
+  it('opens on Pick before the target and on My ranking once it is reached (F8)', () => {
+    const data = stubStorage()
+    let store = useRankingStore()
+    expect(store.startView).toBe('compare')
+    for (let i = 0; i < 26; i++) store.pick('left')
+    setActivePinia(createPinia())
+    store = useRankingStore()
+    expect(store.startView).toBe('compare')
+    store.pick('left')
+    expect(store.startView).toBe('compare') // only decided at load
+    setActivePinia(createPinia())
+    expect(useRankingStore().startView).toBe('results')
+    expect(KEY in data).toBe(true)
+  })
+
   it('stage moves start → half → almost → ready at 50%, 85% and the target', () => {
     stubStorage()
     const store = useRankingStore()

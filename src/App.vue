@@ -5,8 +5,13 @@ import ComparisonView from './components/ComparisonView.vue'
 import ResultsView from './components/ResultsView.vue'
 import CreditsView from './components/CreditsView.vue'
 
-const view = ref('compare')
 const store = useRankingStore()
+const view = ref(store.startView)
+
+const TITLES = { compare: 'Pick', results: 'My ranking', credits: 'Photo credits' }
+watchEffect(() => {
+  document.title = `${TITLES[view.value]} · Idol Ranker`
+})
 
 // The page background shifts color at progress milestones (start → halfway → almost → ready).
 watchEffect(() => {
@@ -43,6 +48,8 @@ watchEffect(() => {
       </nav>
     </header>
 
+    <div class="live" role="status" aria-live="polite">{{ store.announcement }}</div>
+
     <main>
       <ComparisonView v-if="view === 'compare'" @show-results="view = 'results'" />
       <ResultsView v-else-if="view === 'results'" @back="view = 'compare'" />
@@ -57,7 +64,19 @@ watchEffect(() => {
 </template>
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Figtree:wght@400;500;600;700&display=swap');
+/* Self-hosted (latin subset, SIL OFL; licenses in public/fonts). Figtree is a variable font. */
+@font-face {
+  font-family: 'Dela Gothic One';
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/dela-gothic-one-latin.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Figtree';
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('/fonts/figtree-latin.woff2') format('woff2');
+}
 
 :root {
   --bg: #d6e4f5;
@@ -113,6 +132,14 @@ watchEffect(() => {
   :root[data-stage='ready'] {
     --bg: #33171f;
   }
+}
+.live {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 * {
   box-sizing: border-box;
@@ -200,6 +227,16 @@ body {
 .footer .link {
   font-size: inherit;
   font-weight: 500;
+}
+/* Touch screens: grow the tap area to 44px without moving the text. */
+@media (pointer: coarse), (max-width: 559px) {
+  .footer .link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 0.5rem;
+    margin: 0 -0.5rem;
+  }
 }
 .link {
   padding: 0;
