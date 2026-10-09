@@ -5,8 +5,8 @@ import ComparisonView from './components/ComparisonView.vue'
 import ResultsView from './components/ResultsView.vue'
 import CreditsView from './components/CreditsView.vue'
 
-const view = ref('compare')
 const store = useRankingStore()
+const view = ref(store.startView)
 
 // The page background shifts color at progress milestones (start → halfway → almost → ready).
 watchEffect(() => {
