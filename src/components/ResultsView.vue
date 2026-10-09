@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import { useRankingStore } from '../stores/ranking.js'
 import IdolAvatar from './IdolAvatar.vue'
 import AppIcon from './AppIcon.vue'
+import AppToast from './AppToast.vue'
 import { formatRankingText } from '../ranking/exportText.js'
 
 const store = useRankingStore()
@@ -103,7 +104,9 @@ function confirmReset() {
         <AppIcon name="copy" :size="16" />
         Copy as text
       </button>
-      <span v-if="copyStatus" class="copy-status" role="status">{{ copyStatus }}</span>
+      <!-- "Copied" is a toast; the status text stays for screen readers. A failure stays inline. -->
+      <span v-if="copyStatus" :class="copyStatus === 'Copied' ? 'sr-only' : 'copy-status'" role="status">{{ copyStatus }}</span>
+      <AppToast :show="copyStatus === 'Copied'" anchor="bottom">Copied</AppToast>
       <template v-if="!confirmingReset">
         <button type="button" class="plain danger-link" @click="confirmingReset = true">
           <AppIcon name="restart" :size="16" />

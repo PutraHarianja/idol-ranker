@@ -4,9 +4,30 @@ import { useRankingStore } from './stores/ranking.js'
 import ComparisonView from './components/ComparisonView.vue'
 import ResultsView from './components/ResultsView.vue'
 import CreditsView from './components/CreditsView.vue'
+import ShareButton from './components/ShareButton.vue'
+import { shareApp, APP_URL } from './share.js'
 
 const store = useRankingStore()
 const view = ref('compare')
+
+// 'copied' → chip + polite announcement, 'manual' → link as selectable text; shared/cancelled show nothing.
+const shareStatus = ref('')
+let shareTimer
+// Clears only the announcement this button set, so a pick's announcement is never wiped.
+function clearShareNote() {
+  clearTimeout(shareTimer)
+  shareStatus.value = ''
+  if (store.announcement === 'Link copied') store.announcement = ''
+}
+async function onShare() {
+  clearShareNote()
+  const result = await shareApp()
+  if (result !== 'copied' && result !== 'manual') return
+  shareStatus.value = result
+  if (result !== 'copied') return
+  store.announcement = 'Link copied'
+  shareTimer = setTimeout(clearShareNote, 2500)
+}
 
 const TITLES = { compare: 'Pick', results: 'My ranking', credits: 'Photo credits' }
 watchEffect(() => {
@@ -46,6 +67,12 @@ watchEffect(() => {
           My ranking
         </button>
       </nav>
+      <ShareButton
+        :status="shareStatus"
+        :url="APP_URL"
+        @share="onShare"
+        @dismiss="shareStatus = ''"
+      />
     </header>
 
     <div class="live" role="status" aria-live="polite">{{ store.announcement }}</div>
@@ -167,6 +194,7 @@ body {
   margin-bottom: 1.25rem;
 }
 .title {
+  flex: 1 1 auto;
   display: flex;
   align-items: center;
   gap: 0.4rem;
@@ -207,6 +235,15 @@ body {
 .tabs button.active {
   background: var(--text);
   color: var(--surface);
+}
+/* Phones: title and Share share the first row, the tabs get their own row. */
+@media (max-width: 559px) {
+  .header .tabs {
+    order: 3;
+  }
+  .header .share-note {
+    order: 4;
+  }
 }
 @media (pointer: coarse) {
   .tabs button {
