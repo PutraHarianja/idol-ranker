@@ -30,7 +30,7 @@ describe('getIdols (R1)', () => {
   it('gives every photo a free license, credit and source, and a file under 200 KB (R10)', () => {
     for (const { id, image } of getIdols()) {
       if (!image) continue
-      expect(image.src).toBe(`/idols/${id}.jpg`)
+      expect(image.src).toBe(`/idols/${id}.webp`)
       expect(image.author).toBeTruthy()
       expect(image.license).toMatch(/^(CC BY(-SA)? [34]\.0|CC0|Public domain)$/)
       expect(image.sourceUrl).toMatch(/^https:\/\/commons\.wikimedia\.org\/wiki\/File:/)
