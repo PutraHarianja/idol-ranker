@@ -22,6 +22,7 @@ async function copyRanking() {
   const text = formatRankingText(store.ranking, {
     decisions: store.decisions,
     provisional: store.isProvisional,
+    url: window.location.origin + import.meta.env.BASE_URL,
   })
   try {
     await navigator.clipboard.writeText(text)
