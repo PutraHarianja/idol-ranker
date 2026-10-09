@@ -111,18 +111,16 @@ describe('ranking store', () => {
     expect(store.announcement).toBe('27 picks in! You can see your ranking so far.')
   })
 
-  it('opens on Pick before the target and on My ranking once it is reached (F8)', () => {
+  it('a reload at the target still has a pair to pick, so the app opens on Pick (#29)', () => {
     const data = stubStorage()
     let store = useRankingStore()
-    expect(store.startView).toBe('compare')
-    for (let i = 0; i < 26; i++) store.pick('left')
+    for (let i = 0; i < store.target; i++) store.pick('left')
+    expect(store.isReady).toBe(true)
     setActivePinia(createPinia())
     store = useRankingStore()
-    expect(store.startView).toBe('compare')
-    store.pick('left')
-    expect(store.startView).toBe('compare') // only decided at load
-    setActivePinia(createPinia())
-    expect(useRankingStore().startView).toBe('results')
+    expect(store.isReady).toBe(true)
+    expect(store.pair).not.toBeNull()
+    expect('startView' in store).toBe(false)
     expect(KEY in data).toBe(true)
   })
 

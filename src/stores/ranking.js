@@ -26,8 +26,6 @@ export const useRankingStore = defineStore('ranking', () => {
   const decisions = computed(() => validComparisons.value.length)
   const target = comparisonTarget(idolIds.length)
   const isReady = computed(() => decisions.value >= target)
-  // View to open on at page load: a user who already reached the target lands on their ranking.
-  const startView = isReady.value ? 'results' : 'compare'
   /** Progress milestone for the UI: 'start' → 'half' (50%) → 'almost' (85%) → 'ready' (target). */
   const stage = computed(() => {
     const ratio = decisions.value / target
@@ -129,7 +127,6 @@ export const useRankingStore = defineStore('ranking', () => {
     decisions,
     target,
     isReady,
-    startView,
     stage,
     appearances,
     isProvisional,
