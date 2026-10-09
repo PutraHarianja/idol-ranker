@@ -13,16 +13,20 @@ const view = ref('compare')
 // 'copied' → chip + polite announcement, 'manual' → link as selectable text; shared/cancelled show nothing.
 const shareStatus = ref('')
 let shareTimer
-async function onShare() {
+// Clears only the announcement this button set, so a pick's announcement is never wiped.
+function clearShareNote() {
   clearTimeout(shareTimer)
+  shareStatus.value = ''
+  if (store.announcement === 'Link copied') store.announcement = ''
+}
+async function onShare() {
+  clearShareNote()
   const result = await shareApp()
-  shareStatus.value = result === 'copied' || result === 'manual' ? result : ''
+  if (result !== 'copied' && result !== 'manual') return
+  shareStatus.value = result
   if (result !== 'copied') return
   store.announcement = 'Link copied'
-  shareTimer = setTimeout(() => {
-    shareStatus.value = ''
-    store.announcement = ''
-  }, 2500)
+  shareTimer = setTimeout(clearShareNote, 2500)
 }
 
 const TITLES = { compare: 'Pick', results: 'My ranking', credits: 'Photo credits' }
