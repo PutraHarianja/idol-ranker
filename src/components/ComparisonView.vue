@@ -1,8 +1,9 @@
 <script setup>
-import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRankingStore } from '../stores/ranking.js'
 import IdolCard from './IdolCard.vue'
 import AppIcon from './AppIcon.vue'
+import { preloadPhotos } from '../preloadPhotos.js'
 
 const store = useRankingStore()
 defineEmits(['show-results'])
@@ -20,6 +21,10 @@ const timing = {
   '--flip': `${FLIP_MS}ms`,
   '--stagger': `${STAGGER_MS}ms`,
 }
+
+// The store picks the next pair the moment a pick is recorded, while the flash is still showing
+// the old one. Start fetching its photos then, so they are ready when the cards flip.
+watch(() => store.pair, preloadPhotos, { immediate: true })
 
 const pairEl = ref(null)
 const flash = ref(null)
