@@ -3,10 +3,12 @@
 Rank your favorite K-pop idols by picking between two at a time. A [Bradley-Terry](https://en.wikipedia.org/wiki/Bradley%E2%80%93Terry_model) model turns your picks into a ranked list with a 0–100 **Goddess Score** for each idol.
 
 - 18 idols from BLACKPINK, TWICE, Red Velvet, aespa, IVE and LE SSERAFIM
-- Pick with a tap or the arrow keys, skip with `S`, undo your last pick
+- Pick with a tap or the arrow keys, call it a tie with `S`, undo your last pick
 - Progress is saved in your browser; refreshing loses nothing
 - Copy your ranking as text
 - Photos from Wikimedia Commons, credited in the app
+
+**Live: https://putraharianja.github.io/idol-ranker/**
 
 Runs entirely in the browser. No backend, no accounts.
 

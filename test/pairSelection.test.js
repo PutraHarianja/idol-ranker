@@ -102,6 +102,34 @@ describe('selectPair (R2, R3)', () => {
   })
 })
 
+// Mean number of pairs shown a second time (either order) within the first 27 picks.
+function meanRepeats(runs, seed) {
+  const random = seededRandom(seed)
+  let repeats = 0
+  for (let run = 0; run < runs; run++) {
+    const log = []
+    const seen = new Set()
+    let lastPair = null
+    for (let k = 0; k < 27; k++) {
+      const pair = selectPair(ids18, log, { lastPair, random })
+      const key = [...pair].sort().join('|')
+      if (seen.has(key)) repeats++
+      seen.add(key)
+      log.push({ winnerId: pair[0], loserId: pair[1], timestamp: 0 })
+      lastPair = pair
+    }
+  }
+  return repeats / runs
+}
+
+describe('repeated pairs (F3)', () => {
+  // Seeded, 1,000 sessions: 1.63 repeats per 27 picks before, 0.15 after.
+  it('rarely shows the same pair twice within 27 picks (1,000 sessions)', () => {
+    const mean = meanRepeats(1000, 13)
+    expect(mean).toBeLessThan(0.4)
+  })
+})
+
 describe('adaptive pairing (P1-2)', () => {
   // Strengths 1..18, so idol-i's closest neighbours are idol-(i±1), idol-(i±2), ...
   const strengths = new Map(ids18.map((id, i) => [id, i + 1]))

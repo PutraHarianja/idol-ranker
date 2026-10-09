@@ -5,8 +5,8 @@ import ComparisonView from './components/ComparisonView.vue'
 import ResultsView from './components/ResultsView.vue'
 import CreditsView from './components/CreditsView.vue'
 
-const view = ref('compare')
 const store = useRankingStore()
+const view = ref(store.startView)
 
 const TITLES = { compare: 'Pick', results: 'My ranking', credits: 'Photo credits' }
 watchEffect(() => {
