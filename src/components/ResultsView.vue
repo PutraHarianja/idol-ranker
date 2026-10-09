@@ -10,9 +10,12 @@ const emit = defineEmits(['back'])
 const confirmingReset = ref(false)
 const copyStatus = ref('')
 
-// The top three sit on a "binder page"; everyone else is in the list below.
-const top = computed(() => store.ranking.slice(0, 3))
-const rest = computed(() => store.ranking.slice(3))
+// Everyone ranked 1-3 sits on the "binder page" (equal scores share a rank, so that can be
+// more than three idols); everyone else is in the list below.
+const top = computed(() => store.ranking.filter((entry) => entry.rank <= 3))
+const rest = computed(() => store.ranking.filter((entry) => entry.rank > 3))
+const isTied = (entry) => top.value.filter((e) => e.rank === entry.rank).length > 1
+const hasTies = computed(() => top.value.some(isTied))
 
 // Copies the ranking as a text list (P1-5).
 async function copyRanking() {
@@ -45,8 +48,8 @@ function confirmReset() {
       {{ store.decisions }} {{ store.decisions === 1 ? 'pick' : 'picks' }}.
     </p>
     <p v-else class="help">
-      You know exactly who you love. These are the idols you kept choosing across your
-      {{ store.decisions }} picks.
+      Look who keeps winning! This is your ranking so far, from your
+      {{ store.decisions }} picks. Every extra pick sharpens it.
     </p>
     <!-- PRD R6: what the score means, visible without leaving the screen. -->
     <p class="help score-meaning">
@@ -57,21 +60,21 @@ function confirmReset() {
       Just a first look. Keep picking for a more accurate ranking.
     </p>
 
-    <ol class="podium">
+    <ol class="podium" :class="{ 'podium--tied': hasTies }">
       <li
-        v-for="(entry, i) in top"
+        v-for="entry in top"
         :key="entry.id"
         class="spot"
-        :class="`spot--${i + 1}`"
+        :class="`spot--${entry.rank}`"
       >
         <span class="spot__card">
           <span class="spot__tape" aria-hidden="true" />
           <IdolAvatar class="spot__photo" :idol="entry.idol" />
-          <span v-if="i === 0" class="spot__sticker" aria-hidden="true">
+          <span v-if="entry.rank === 1" class="spot__sticker" aria-hidden="true">
             <AppIcon name="sparkle" :size="34" />
           </span>
         </span>
-        <span class="spot__rank">#{{ entry.rank }}</span>
+        <span class="spot__rank">{{ isTied(entry) ? 'Tied ' : '' }}#{{ entry.rank }}</span>
         <span class="spot__name">{{ entry.idol.name }}</span>
         <span class="spot__group">{{ entry.idol.group }}</span>
         <span class="spot__score"><span class="sr-only">Goddess Score </span>{{ entry.score }}</span>
@@ -145,7 +148,8 @@ function confirmReset() {
   white-space: nowrap;
 }
 
-/* Binder page: #2 · #1 · #3, with #1 biggest in the middle. */
+/* Binder page: #2 · #1 · #3, with #1 biggest in the middle. When ranks are tied it becomes
+   a centered, wrapping row in rank order, with each tied card labeled "Tied #n". */
 .podium {
   display: grid;
   grid-template-columns: 1fr 1.3fr 1fr;
@@ -165,14 +169,22 @@ function confirmReset() {
   min-width: 0;
   text-align: center;
 }
-.spot--1 {
+.podium:not(.podium--tied) .spot--1 {
   order: 2;
 }
-.spot--2 {
+.podium:not(.podium--tied) .spot--2 {
   order: 1;
 }
-.spot--3 {
+.podium:not(.podium--tied) .spot--3 {
   order: 3;
+}
+.podium--tied {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.podium--tied .spot {
+  flex: 0 0 calc((100% - 1.8rem) / 3);
 }
 .spot__card {
   position: relative;
@@ -384,6 +396,12 @@ button:focus-visible {
   .podium {
     gap: 0.6rem;
     padding: 1.1rem 0.75rem 0.85rem;
+  }
+  .podium--tied .spot {
+    flex-basis: calc((100% - 1.2rem) / 3);
+  }
+  .spot__rank {
+    font-size: 0.85rem;
   }
   .spot__name {
     font-size: 0.8rem;

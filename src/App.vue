@@ -57,7 +57,19 @@ watchEffect(() => {
 </template>
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Figtree:wght@400;500;600;700&display=swap');
+/* Self-hosted (latin subset, SIL OFL; licenses in public/fonts). Figtree is a variable font. */
+@font-face {
+  font-family: 'Dela Gothic One';
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/dela-gothic-one-latin.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Figtree';
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('/fonts/figtree-latin.woff2') format('woff2');
+}
 
 :root {
   --bg: #d6e4f5;
@@ -200,6 +212,16 @@ body {
 .footer .link {
   font-size: inherit;
   font-weight: 500;
+}
+/* Touch screens: grow the tap area to 44px without moving the text. */
+@media (pointer: coarse), (max-width: 559px) {
+  .footer .link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 0.5rem;
+    margin: 0 -0.5rem;
+  }
 }
 .link {
   padding: 0;
