@@ -12,7 +12,7 @@ describe('formatRankingText (P1-5)', () => {
   it('lists rank, name, group and score, one per line', () => {
     expect(formatRankingText(ranking, { decisions: 27, provisional: false, url })).toBe(
       [
-        '👑 My Idol Ranking (27 picks)',
+        '👑 My Top 5 Idols (27 picks)',
         '1. Joy (Red Velvet) — 81',
         '1. Karina (aespa) — 81',
         '3. Rosé (BLACKPINK) — 40',
@@ -36,6 +36,6 @@ describe('formatRankingText (P1-5)', () => {
 
   it('marks a provisional ranking and uses singular "pick"', () => {
     const text = formatRankingText(ranking.slice(0, 1), { decisions: 1, provisional: true, url })
-    expect(text.split('\n')[0]).toBe('👑 My Idol Ranking (1 pick, provisional)')
+    expect(text.split('\n')[0]).toBe('👑 My Top 5 Idols (1 pick, provisional)')
   })
 })

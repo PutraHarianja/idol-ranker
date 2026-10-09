@@ -7,7 +7,7 @@ const TOP_N = 5 // only the top of the list is copied
  * @param {{ decisions: number, provisional: boolean, url: string }} meta
  */
 export function formatRankingText(ranking, { decisions, provisional, url }) {
-  const header = `👑 My Idol Ranking (${decisions} ${decisions === 1 ? 'pick' : 'picks'}${provisional ? ', provisional' : ''})`
+  const header = `👑 My Top ${TOP_N} Idols (${decisions} ${decisions === 1 ? 'pick' : 'picks'}${provisional ? ', provisional' : ''})`
   const lines = ranking.slice(0, TOP_N).map(
     ({ rank, score, idol }) => `${rank}. ${idol.name} (${idol.group}) — ${score}`,
   )
