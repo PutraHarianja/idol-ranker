@@ -236,16 +236,22 @@ body {
   background: var(--text);
   color: var(--surface);
 }
-/* Phones: stack the wordmark and tighten spacing so title, tabs and Share fit one row from 360px. */
+/* Phones: stack the wordmark (star + "Idol", then "Ranker") and tighten spacing so title,
+   tabs and Share fit one row from 360px. */
 @media (max-width: 459px) {
   .header {
     gap: 0.5rem;
   }
   .title {
+    display: block;
     font-size: 0.95rem;
     line-height: 1;
   }
-  .title__text span {
+  .title__mark {
+    margin-right: 0.15rem;
+    vertical-align: -0.22em;
+  }
+  .title__text span + span {
     display: block;
   }
   .tabs button {
