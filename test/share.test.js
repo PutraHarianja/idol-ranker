@@ -18,8 +18,26 @@ describe('shareApp (P1-7)', () => {
     const writeText = vi.fn()
     stub({ share, writeText })
     expect(await shareApp()).toBe('shared')
-    expect(share).toHaveBeenCalledWith({ title: SHARE_TITLE, text: SHARE_TEXT, url: APP_URL })
+    expect(share).toHaveBeenCalledWith({ title: SHARE_TITLE, text: SHARE_TEXT })
     expect(writeText).not.toHaveBeenCalled()
+  })
+
+  it('sends the structured message with the link once, alone on the last line (#50, #51)', async () => {
+    const share = vi.fn().mockResolvedValue()
+    stub({ share })
+    await shareApp()
+    const payload = share.mock.calls[0][0]
+    expect(payload).toEqual({
+      title: 'Idol Ranker',
+      text:
+        '✦ Idol Ranker\n' +
+        'Rank the goddesses! Pick your favorite of two, again and again.\n' +
+        '\n' +
+        'https://putraharianja.github.io/idol-ranker/',
+    })
+    expect(payload).not.toHaveProperty('url')
+    expect(payload.text.split(APP_URL)).toHaveLength(2)
+    expect(payload.text.endsWith(`\n${APP_URL}`)).toBe(true)
   })
 
   it('returns cancelled when the sheet is closed, without copying', async () => {
