@@ -47,7 +47,7 @@ watchEffect(() => {
         <svg class="title__mark" viewBox="0 0 24 24" aria-hidden="true">
           <path d="M12 2.5 13.9 10l7.6 2-7.6 2L12 21.5 10.1 14l-7.6-2 7.6-2z" />
         </svg>
-        Idol Ranker
+        <span class="title__text"><span>Idol</span> <span>Ranker</span></span>
       </h1>
       <nav class="tabs">
         <button
@@ -236,13 +236,20 @@ body {
   background: var(--text);
   color: var(--surface);
 }
-/* Phones: title and Share share the first row, the tabs get their own row. */
-@media (max-width: 559px) {
-  .header .tabs {
-    order: 3;
+/* Phones: stack the wordmark and tighten spacing so title, tabs and Share fit one row from 360px. */
+@media (max-width: 459px) {
+  .header {
+    gap: 0.5rem;
   }
-  .header .share-note {
-    order: 4;
+  .title {
+    font-size: 0.95rem;
+    line-height: 1;
+  }
+  .title__text span {
+    display: block;
+  }
+  .tabs button {
+    padding-inline: 0.75rem;
   }
 }
 @media (pointer: coarse) {
