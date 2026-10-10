@@ -35,9 +35,8 @@ watch(
 </script>
 
 <template>
-  <button ref="shareEl" type="button" class="share" @click="$emit('share')">
-    <AppIcon name="share" :size="18" />
-    Share
+  <button ref="shareEl" type="button" class="share" aria-label="Share" title="Share" @click="$emit('share')">
+    <AppIcon name="share" :size="20" />
   </button>
   <AppToast :show="status === 'copied'">Link copied</AppToast>
   <div v-if="status === 'manual'" class="share-note share-note--manual">
@@ -50,10 +49,12 @@ watch(
 <style scoped>
 .share {
   display: inline-flex;
+  flex-shrink: 0;
   align-items: center;
-  gap: 0.4rem;
-  min-height: 44px;
-  padding: 0.4rem 1.1rem 0.4rem 0.9rem;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
   border: none;
   border-radius: 999px;
   background: var(--surface);
