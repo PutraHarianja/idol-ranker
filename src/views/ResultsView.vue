@@ -1,9 +1,9 @@
 <script setup>
 import { computed, nextTick, ref } from 'vue'
 import { useRankingStore } from '../stores/ranking.js'
-import IdolAvatar from './IdolAvatar.vue'
-import AppIcon from './AppIcon.vue'
-import AppToast from './AppToast.vue'
+import IdolAvatar from '../components/IdolAvatar.vue'
+import AppIcon from '../components/AppIcon.vue'
+import AppToast from '../components/AppToast.vue'
 import { formatRankingText } from '../ranking/exportText.js'
 
 const store = useRankingStore()

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { shareApp, APP_URL, SHARE_TITLE, SHARE_TEXT } from '../src/share.js'
+import { shareApp, APP_URL, SHARE_TITLE, SHARE_TEXT } from '../src/browser/share.js'
 
 const abort = () => Object.assign(new Error('cancelled'), { name: 'AbortError' })
 
