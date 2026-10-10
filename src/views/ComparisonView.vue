@@ -1,9 +1,9 @@
 <script setup>
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRankingStore } from '../stores/ranking.js'
-import IdolCard from './IdolCard.vue'
-import AppIcon from './AppIcon.vue'
-import { preloadPhotos } from '../preloadPhotos.js'
+import IdolCard from '../components/IdolCard.vue'
+import AppIcon from '../components/AppIcon.vue'
+import { preloadPhotos } from '../browser/preloadPhotos.js'
 
 const store = useRankingStore()
 defineEmits(['show-results'])
