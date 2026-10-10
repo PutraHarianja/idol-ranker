@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watchEffect } from 'vue'
+import { nextTick, ref, watchEffect } from 'vue'
 import { useRankingStore } from './stores/ranking.js'
 import ComparisonView from './components/ComparisonView.vue'
 import ResultsView from './components/ResultsView.vue'
@@ -9,6 +9,14 @@ import { shareApp, APP_URL } from './share.js'
 
 const store = useRankingStore()
 const view = ref('compare')
+const pickTab = ref(null)
+
+// Leaving My ranking unmounts the button that had focus, so land on the Pick tab (#66).
+async function backToPick() {
+  view.value = 'compare'
+  await nextTick()
+  pickTab.value?.focus()
+}
 
 // 'copied' → chip + polite announcement, 'manual' → link as selectable text; shared/cancelled show nothing.
 const shareStatus = ref('')
@@ -47,10 +55,11 @@ watchEffect(() => {
         <svg class="title__mark" viewBox="0 0 24 24" aria-hidden="true">
           <path d="M12 2.5 13.9 10l7.6 2-7.6 2L12 21.5 10.1 14l-7.6-2 7.6-2z" />
         </svg>
-        Idol Ranker
+        <span class="title__text"><span>Idol</span> <span>Ranker</span></span>
       </h1>
       <nav class="tabs">
         <button
+          ref="pickTab"
           type="button"
           :class="{ active: view === 'compare' }"
           :aria-current="view === 'compare' ? 'page' : undefined"
@@ -79,7 +88,7 @@ watchEffect(() => {
 
     <main>
       <ComparisonView v-if="view === 'compare'" @show-results="view = 'results'" />
-      <ResultsView v-else-if="view === 'results'" @back="view = 'compare'" />
+      <ResultsView v-else-if="view === 'results'" @back="backToPick" />
       <CreditsView v-else @back="view = 'compare'" />
     </main>
 
@@ -236,13 +245,26 @@ body {
   background: var(--text);
   color: var(--surface);
 }
-/* Phones: title and Share share the first row, the tabs get their own row. */
-@media (max-width: 559px) {
-  .header .tabs {
-    order: 3;
+/* Phones: stack the wordmark (star + "Idol", then "Ranker") and tighten spacing so title,
+   tabs and Share fit one row from 360px. */
+@media (max-width: 459px) {
+  .header {
+    gap: 0.5rem;
   }
-  .header .share-note {
-    order: 4;
+  .title {
+    display: block;
+    font-size: 0.95rem;
+    line-height: 1;
+  }
+  .title__mark {
+    margin-right: 0.15rem;
+    vertical-align: -0.22em;
+  }
+  .title__text span + span {
+    display: block;
+  }
+  .tabs button {
+    padding-inline: 0.75rem;
   }
 }
 @media (pointer: coarse) {
