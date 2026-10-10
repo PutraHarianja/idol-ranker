@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watchEffect } from 'vue'
+import { nextTick, ref, watchEffect } from 'vue'
 import { useRankingStore } from './stores/ranking.js'
 import ComparisonView from './components/ComparisonView.vue'
 import ResultsView from './components/ResultsView.vue'
@@ -9,6 +9,14 @@ import { shareApp, APP_URL } from './share.js'
 
 const store = useRankingStore()
 const view = ref('compare')
+const pickTab = ref(null)
+
+// Leaving My ranking unmounts the button that had focus, so land on the Pick tab (#66).
+async function backToPick() {
+  view.value = 'compare'
+  await nextTick()
+  pickTab.value?.focus()
+}
 
 // 'copied' → chip + polite announcement, 'manual' → link as selectable text; shared/cancelled show nothing.
 const shareStatus = ref('')
@@ -51,6 +59,7 @@ watchEffect(() => {
       </h1>
       <nav class="tabs">
         <button
+          ref="pickTab"
           type="button"
           :class="{ active: view === 'compare' }"
           :aria-current="view === 'compare' ? 'page' : undefined"
@@ -79,7 +88,7 @@ watchEffect(() => {
 
     <main>
       <ComparisonView v-if="view === 'compare'" @show-results="view = 'results'" />
-      <ResultsView v-else-if="view === 'results'" @back="view = 'compare'" />
+      <ResultsView v-else-if="view === 'results'" @back="backToPick" />
       <CreditsView v-else @back="view = 'compare'" />
     </main>
 

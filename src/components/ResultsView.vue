@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, nextTick, ref } from 'vue'
 import { useRankingStore } from '../stores/ranking.js'
 import IdolAvatar from './IdolAvatar.vue'
 import AppIcon from './AppIcon.vue'
@@ -9,6 +9,8 @@ import { formatRankingText } from '../ranking/exportText.js'
 const store = useRankingStore()
 const emit = defineEmits(['back'])
 const confirmingReset = ref(false)
+const startOverEl = ref(null)
+const cancelEl = ref(null)
 const copyStatus = ref('')
 
 // Everyone ranked 1-3 sits on the "binder page" (equal scores share a rank, so that can be
@@ -32,6 +34,19 @@ async function copyRanking() {
     copyStatus.value = "Couldn't copy. Your browser blocked clipboard access."
   }
   setTimeout(() => (copyStatus.value = ''), 2500)
+}
+
+// The button that had focus disappears at each step, so move focus on (#66): Cancel is the safe
+// choice; Cancel hands it back to Start over; confirming leaves the view (App focuses the Pick tab).
+async function askReset() {
+  confirmingReset.value = true
+  await nextTick()
+  cancelEl.value?.focus()
+}
+async function cancelReset() {
+  confirmingReset.value = false
+  await nextTick()
+  startOverEl.value?.focus()
 }
 
 function confirmReset() {
@@ -108,7 +123,7 @@ function confirmReset() {
       <span v-if="copyStatus" :class="copyStatus === 'Copied' ? 'sr-only' : 'copy-status'" role="status">{{ copyStatus }}</span>
       <AppToast :show="copyStatus === 'Copied'" anchor="bottom">Copied</AppToast>
       <template v-if="!confirmingReset">
-        <button type="button" class="plain danger-link" @click="confirmingReset = true">
+        <button ref="startOverEl" type="button" class="plain danger-link" @click="askReset">
           <AppIcon name="restart" :size="16" />
           Start over
         </button>
@@ -116,7 +131,7 @@ function confirmReset() {
       <div v-else class="confirm" role="alertdialog" aria-label="Confirm start over">
         <span>Delete all {{ store.decisions }} picks?</span>
         <button type="button" class="danger" @click="confirmReset">Yes, start over</button>
-        <button type="button" class="plain" @click="confirmingReset = false">Cancel</button>
+        <button ref="cancelEl" type="button" class="plain" @click="cancelReset">Cancel</button>
       </div>
     </div>
   </section>
