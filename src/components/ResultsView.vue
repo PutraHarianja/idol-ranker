@@ -391,6 +391,10 @@ button:focus-visible {
 .danger-link {
   color: var(--danger);
 }
+/* Inside the white confirm box a shadow alone doesn't read as a button; outline it instead. */
+.confirm .plain {
+  box-shadow: inset 0 0 0 2px var(--border);
+}
 /* Start over sits apart from the safe actions. */
 .danger-link,
 .confirm {
@@ -434,9 +438,21 @@ button:focus-visible {
   .danger-link {
     margin: 0.25rem auto 0;
   }
+  /* Phones: the question on its own line, then both choices side by side at equal width. */
   .confirm {
     flex-basis: 100%;
+    gap: 0.6rem;
     margin-left: 0;
+    padding: 0.85rem;
+  }
+  .confirm > span {
+    flex-basis: 100%;
+  }
+  .confirm > button {
+    flex: 1 1 0;
+    justify-content: center;
+    padding-inline: 0.75rem;
+    white-space: nowrap;
   }
 }
 </style>
