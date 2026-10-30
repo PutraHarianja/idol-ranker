@@ -1,6 +1,6 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
-import { getGroupColor } from '../data/idols.js'
+import { getGroupColor } from '@/data/idols.js'
 
 const props = defineProps({
   idol: { type: Object, required: true },

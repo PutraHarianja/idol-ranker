@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { formatRankingText } from '../src/ranking/exportText.js'
+import { formatRankingText } from '@/ranking/exportText.js'
 
 const url = 'https://example.com/idol-ranker/'
 const ranking = [

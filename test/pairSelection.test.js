@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { selectPair, countAppearances } from '../src/ranking/pairSelection.js'
-import { fitBradleyTerry } from '../src/ranking/bradleyTerry.js'
+import { selectPair, countAppearances } from '@/ranking/pairSelection.js'
+import { fitBradleyTerry } from '@/ranking/bradleyTerry.js'
 import { seededRandom, kendallTau } from './helpers.js'
 
 const ids18 = Array.from({ length: 18 }, (_, i) => `idol-${i}`)

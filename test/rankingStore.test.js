@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
-import { useRankingStore } from '../src/stores/ranking.js'
+import { useRankingStore } from '@/stores/ranking.js'
 
 const KEY = 'idol-ranker:v1:default'
 

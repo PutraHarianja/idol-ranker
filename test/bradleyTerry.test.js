@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { fitBradleyTerry } from '../src/ranking/bradleyTerry.js'
+import { fitBradleyTerry } from '@/ranking/bradleyTerry.js'
 import { seededRandom, kendallTau } from './helpers.js'
 
 const beat = (winnerId, loserId, times = 1) =>

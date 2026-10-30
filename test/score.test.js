@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { goddessScore, rankWithScores, comparisonTarget } from '../src/ranking/score.js'
+import { goddessScore, rankWithScores, comparisonTarget } from '@/ranking/score.js'
 
 describe('goddessScore (R6)', () => {
   it('maps strength to a 0–100 integer', () => {

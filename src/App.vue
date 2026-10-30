@@ -1,11 +1,11 @@
 <script setup>
 import { nextTick, ref, watchEffect } from 'vue'
-import { useRankingStore } from './stores/ranking.js'
-import ComparisonView from './views/ComparisonView.vue'
-import ResultsView from './views/ResultsView.vue'
-import CreditsView from './views/CreditsView.vue'
-import ShareButton from './components/ShareButton.vue'
-import { shareApp, APP_URL } from './browser/share.js'
+import { useRankingStore } from '@/stores/ranking.js'
+import ComparisonView from '@/views/ComparisonView.vue'
+import ResultsView from '@/views/ResultsView.vue'
+import CreditsView from '@/views/CreditsView.vue'
+import ShareButton from '@/components/ShareButton.vue'
+import { shareApp, APP_URL } from '@/browser/share.js'
 
 const store = useRankingStore()
 const view = ref('compare')
