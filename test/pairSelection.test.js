@@ -213,5 +213,5 @@ describe('adaptive pairing (P1-2)', () => {
       seeds.reduce((sum, seed) => sum + meanTau(true, seed) - meanTau(false, seed), 0) /
       seeds.length
     expect(meanGap).toBeGreaterThan(0.015)
-  })
+  }, 20_000) // slow simulation: over the 5s default on the GitHub runner
 })
