@@ -4,6 +4,7 @@ import { useRankingStore } from '@/stores/ranking.js'
 import IdolAvatar from '@/components/IdolAvatar.vue'
 import AppIcon from '@/components/AppIcon.vue'
 import AppToast from '@/components/AppToast.vue'
+import StoryShareButton from '@/components/StoryShareButton.vue'
 import { formatRankingText } from '@/ranking/exportText.js'
 
 const store = useRankingStore()
@@ -12,6 +13,11 @@ const confirmingReset = ref(false)
 const startOverEl = ref(null)
 const cancelEl = ref(null)
 const copyStatus = ref('')
+// Share to Story (P1-9). #62 (FE): set canShareStory from file-share support, share public/story.jpg
+// in shareStory, and set storyHint to 'copied' or 'sticker'. Hidden until then.
+const canShareStory = ref(false)
+const storyHint = ref('')
+function shareStory() {}
 
 // Everyone ranked 1-3 sits on the "binder page" (equal scores share a rank, so that can be
 // more than three idols); everyone else is in the list below.
@@ -124,6 +130,12 @@ function confirmReset() {
         >{{ copyStatus }}</span
       >
       <AppToast :show="copyStatus === 'Copied'" anchor="bottom">Copied</AppToast>
+      <StoryShareButton
+        v-if="canShareStory"
+        :hint="storyHint"
+        @share-story="shareStory"
+        @dismiss="storyHint = ''"
+      />
       <template v-if="!confirmingReset">
         <button ref="startOverEl" type="button" class="plain danger-link" @click="askReset">
           <AppIcon name="restart" :size="16" />
