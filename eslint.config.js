@@ -15,6 +15,10 @@ const browserGlobals = Object.fromEntries(
     'requestAnimationFrame',
     'Image',
     'File',
+    'Blob',
+    'Response',
+    'DOMException',
+    'fetch',
     '__APP_VERSION__',
   ].map((name) => [name, 'readonly']),
 )

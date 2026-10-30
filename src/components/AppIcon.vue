@@ -13,6 +13,8 @@ const PATHS = {
   copy: 'M9 8.5h9.5v11H9zM15 8.5V4.5H5.5v11H9',
   share: 'M12 15V4M12 4 7.5 8.5M12 4l4.5 4.5M5 13v6.5h14V13',
   restart: 'M19 12a7 7 0 1 1-2.1-5M19 4.5V9h-4.5',
+  story:
+    'M8 3h8a2.5 2.5 0 0 1 2.5 2.5v13A2.5 2.5 0 0 1 16 21H8a2.5 2.5 0 0 1-2.5-2.5v-13A2.5 2.5 0 0 1 8 3zM12 9v6M9 12h6',
 }
 const FILLED = new Set(['sparkle', 'heart'])
 </script>

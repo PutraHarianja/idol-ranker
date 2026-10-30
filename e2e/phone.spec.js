@@ -72,6 +72,19 @@ test.describe('Start over', () => {
     await expectNoHorizontalScroll(page)
   })
 
+  // #100: Start over at the very bottom of the screen (as after scrolling just far enough to see it).
+  // The confirmation is taller than the button, so all of it must scroll into view, not just Cancel.
+  test('confirmation opened from the bottom edge fits fully', async ({ page }) => {
+    await open(page, 'My ranking')
+    const startOver = page.getByRole('button', { name: 'Start over' })
+    await startOver.evaluate((el) => el.scrollIntoView({ block: 'end' }))
+    await startOver.click()
+    await expect(page.getByRole('alertdialog', { name: 'Confirm start over' })).toBeInViewport({
+      ratio: 1,
+    })
+    await expect(page.getByRole('button', { name: 'Cancel' })).toBeFocused()
+  })
+
   test('keyboard focus moves on at each step (#66)', async ({ page }) => {
     await open(page, 'My ranking')
     await page.getByRole('button', { name: 'Start over' }).focus()
@@ -105,4 +118,64 @@ test('Share falls back to the link as text when the clipboard is denied', async 
   await expect(page.locator('.share-note__link')).toContainText('http')
   await expectNoHorizontalScroll(page)
   expect(errors).toEqual([])
+})
+
+// Share to Story (P1-9). Headless Chromium has no file share, so the share sheet is stubbed.
+async function stubFileShare(page, { cancel = false } = {}) {
+  await page.addInitScript((cancel) => {
+    window.__shared = []
+    const define = (name, value) =>
+      Object.defineProperty(navigator, name, { value, configurable: true })
+    define('canShare', (data) => Array.isArray(data?.files))
+    define('share', async (data) => {
+      window.__shared.push({
+        files: data.files.map((f) => ({ name: f.name, type: f.type, size: f.size })),
+        text: data.text,
+        url: data.url,
+      })
+      if (cancel) throw new DOMException('cancelled', 'AbortError')
+    })
+    define('clipboard', { writeText: async (text) => (window.__copied = text) })
+  }, cancel)
+}
+
+test('Share to Story is hidden where the browser cannot share files', async ({ page }) => {
+  await page.addInitScript(() =>
+    Object.defineProperty(navigator, 'canShare', { value: undefined, configurable: true }),
+  )
+  await open(page, 'My ranking')
+  await expect(page.getByRole('button', { name: 'Copy as text' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Share to Story' })).toHaveCount(0)
+})
+
+test('Share to Story shares the story image, copies the link and shows the hint', async ({
+  page,
+}) => {
+  await stubFileShare(page)
+  await open(page, 'My ranking')
+  await page.getByRole('button', { name: 'Share to Story' }).click()
+  await expect(page.locator('.story-hint')).toContainText('Link copied.')
+  const shared = await page.evaluate(() => window.__shared)
+  expect(shared).toHaveLength(1)
+  expect(shared[0].files).toEqual([
+    { name: 'idol-ranker-story.jpg', type: 'image/jpeg', size: expect.any(Number) },
+  ])
+  expect(shared[0].files[0].size).toBeGreaterThan(10_000)
+  expect(shared[0].text).toContain('https://putraharianja.github.io/idol-ranker/')
+  expect(shared[0].url).toBeUndefined()
+  expect(await page.evaluate(() => window.__copied)).toBe(
+    'https://putraharianja.github.io/idol-ranker/',
+  )
+  await expectNoHorizontalScroll(page)
+  await page.getByRole('button', { name: 'Got it' }).click()
+  await expect(page.locator('.story-hint')).toHaveCount(0)
+  await expect(page.getByRole('button', { name: 'Share to Story' })).toBeFocused()
+})
+
+test('Share to Story shows no hint when the share sheet is closed', async ({ page }) => {
+  await stubFileShare(page, { cancel: true })
+  await open(page, 'My ranking')
+  await page.getByRole('button', { name: 'Share to Story' }).click()
+  await expect.poll(() => page.evaluate(() => window.__shared.length)).toBe(1)
+  await expect(page.locator('.story-hint')).toHaveCount(0)
 })

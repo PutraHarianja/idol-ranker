@@ -3,15 +3,19 @@ updates:
   # target-branch = the current release branch. Update it in each "Bump version" PR.
   - package-ecosystem: npm
     directory: /
-    target-branch: release/1.3.0
+    target-branch: release/1.4.0
     schedule:
       interval: monthly
     groups:
       npm:
         patterns: ['*']
+    # Majors get their own ticket (a manual PR), not a grouped Dependabot PR.
+    ignore:
+      - dependency-name: '*'
+        update-types: ['version-update:semver-major']
   - package-ecosystem: github-actions
     directory: /
-    target-branch: release/1.3.0
+    target-branch: release/1.4.0
     schedule:
       interval: monthly
     groups:

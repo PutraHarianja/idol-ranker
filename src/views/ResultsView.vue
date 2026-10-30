@@ -1,17 +1,41 @@
 <script setup>
-import { computed, nextTick, ref } from 'vue'
+import { computed, nextTick, onMounted, ref } from 'vue'
 import { useRankingStore } from '@/stores/ranking.js'
 import IdolAvatar from '@/components/IdolAvatar.vue'
 import AppIcon from '@/components/AppIcon.vue'
 import AppToast from '@/components/AppToast.vue'
+import StoryShareButton from '@/components/StoryShareButton.vue'
 import { formatRankingText } from '@/ranking/exportText.js'
+import { canShareFiles, loadStoryFile, shareStory as shareStoryFile } from '@/browser/share.js'
 
 const store = useRankingStore()
 const emit = defineEmits(['back'])
 const confirmingReset = ref(false)
 const startOverEl = ref(null)
 const cancelEl = ref(null)
+const confirmEl = ref(null)
 const copyStatus = ref('')
+// Share to Story (P1-9). The button shows only where the share sheet takes files, once the image
+// is loaded: the tap must open the sheet straight away. The hint shows as soon as the copy
+// settles, so it's there on the way into Instagram, and goes away if the share doesn't happen.
+const canShareStory = ref(false)
+const storyHint = ref('')
+const storyError = ref('')
+let storyFile = null
+onMounted(async () => {
+  if (!canShareFiles()) return
+  storyFile = await loadStoryFile(import.meta.env.BASE_URL + 'story.jpg')
+  canShareStory.value = !!storyFile
+})
+async function shareStory() {
+  storyError.value = ''
+  const { status } = await shareStoryFile(storyFile, (copied) => {
+    storyHint.value = copied ? 'copied' : 'sticker'
+  })
+  if (status === 'shared') return
+  storyHint.value = ''
+  if (status === 'failed') storyError.value = "Couldn't open the share sheet. Please try again."
+}
 
 // Everyone ranked 1-3 sits on the "binder page" (equal scores share a rank, so that can be
 // more than three idols); everyone else is in the list below.
@@ -38,10 +62,12 @@ async function copyRanking() {
 
 // The button that had focus disappears at each step, so move focus on (#66): Cancel is the safe
 // choice; Cancel hands it back to Start over; confirming leaves the view (App focuses the Pick tab).
+// The box is taller than Start over, so scroll all of it into view, not just Cancel (#100).
 async function askReset() {
   confirmingReset.value = true
   await nextTick()
-  cancelEl.value?.focus()
+  confirmEl.value?.scrollIntoView({ block: 'nearest' })
+  cancelEl.value?.focus({ preventScroll: true })
 }
 async function cancelReset() {
   confirmingReset.value = false
@@ -124,13 +150,26 @@ function confirmReset() {
         >{{ copyStatus }}</span
       >
       <AppToast :show="copyStatus === 'Copied'" anchor="bottom">Copied</AppToast>
+      <StoryShareButton
+        v-if="canShareStory"
+        :hint="storyHint"
+        @share-story="shareStory"
+        @dismiss="storyHint = ''"
+      />
+      <span v-if="storyError" class="copy-status" role="status">{{ storyError }}</span>
       <template v-if="!confirmingReset">
         <button ref="startOverEl" type="button" class="plain danger-link" @click="askReset">
           <AppIcon name="restart" :size="16" />
           Start over
         </button>
       </template>
-      <div v-else class="confirm" role="alertdialog" aria-label="Confirm start over">
+      <div
+        v-else
+        ref="confirmEl"
+        class="confirm"
+        role="alertdialog"
+        aria-label="Confirm start over"
+      >
         <span>Delete all {{ store.decisions }} picks?</span>
         <button type="button" class="danger" @click="confirmReset">Yes, start over</button>
         <button ref="cancelEl" type="button" class="plain" @click="cancelReset">Cancel</button>
@@ -375,6 +414,8 @@ function confirmReset() {
   background: var(--surface);
   box-shadow: inset 0 0 0 2px var(--danger);
   font-weight: 600;
+  /* Room around it when askReset() scrolls it into view (#100). */
+  scroll-margin-block: 1rem;
 }
 button {
   display: inline-flex;
