@@ -1,0 +1,69 @@
+/* Self-hosted (latin subset, SIL OFL; licenses in public/fonts). Figtree is a variable font. */
+@font-face {
+  font-family: 'Dela Gothic One';
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/dela-gothic-one-latin.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Figtree';
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('/fonts/figtree-latin.woff2') format('woff2');
+}
+
+:root {
+  --bg: #d6e4f5;
+  --surface: #ffffff;
+  --text: #172a55;
+  --muted: #4b5b80;
+  --border: #b9cbe3;
+  --accent: #d92e46;
+  --on-accent: #ffffff;
+  --accent-soft: #ffffff;
+  --tape-1: #f5c542;
+  --tape-2: #86d1b0;
+  --warn-soft: #fff4d6;
+  --warn-text: #6b4e00;
+  --danger: #b42318;
+  --radius: 12px;
+  --shadow: 0 1px 0 rgb(23 42 85 / 0.08), 0 10px 24px -14px rgb(23 42 85 / 0.45);
+  --font-display: 'Dela Gothic One', 'Arial Black', system-ui, sans-serif;
+  --font-body: 'Figtree', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  color-scheme: light;
+}
+:root[data-stage='half'] {
+  --bg: #d3ede2;
+}
+:root[data-stage='almost'] {
+  --bg: #f8e9c2;
+}
+:root[data-stage='ready'] {
+  --bg: #f9dce0;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #101b38;
+    --surface: #1b2850;
+    --text: #eef2fa;
+    --muted: #a9b4d0;
+    --border: #2f3d68;
+    --accent: #ff5a6e;
+    --on-accent: #101b38;
+    --accent-soft: #1b2850;
+    --warn-soft: #3a2f12;
+    --warn-text: #f5d98b;
+    --danger: #ff8a80;
+    --shadow: 0 1px 0 rgb(0 0 0 / 0.3), 0 12px 28px -14px rgb(0 0 0 / 0.8);
+    color-scheme: dark;
+  }
+  :root[data-stage='half'] {
+    --bg: #10292a;
+  }
+  :root[data-stage='almost'] {
+    --bg: #2a2414;
+  }
+  :root[data-stage='ready'] {
+    --bg: #33171f;
+  }
+}
