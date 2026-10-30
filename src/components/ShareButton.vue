@@ -35,13 +35,22 @@ watch(
 </script>
 
 <template>
-  <button ref="shareEl" type="button" class="share" aria-label="Share" title="Share" @click="$emit('share')">
+  <button
+    ref="shareEl"
+    type="button"
+    class="share"
+    aria-label="Share"
+    title="Share"
+    @click="$emit('share')"
+  >
     <AppIcon name="share" :size="20" />
   </button>
   <AppToast :show="status === 'copied'">Link copied</AppToast>
   <div v-if="status === 'manual'" class="share-note share-note--manual">
     <p id="share-note-line" class="share-note__line">Couldn't copy. Here's the link:</p>
-    <p ref="linkEl" class="share-note__link" tabindex="-1" aria-describedby="share-note-line">{{ url }}</p>
+    <p ref="linkEl" class="share-note__link" tabindex="-1" aria-describedby="share-note-line">
+      {{ url }}
+    </p>
     <button type="button" class="share-note__close" @click="close">Close</button>
   </div>
 </template>

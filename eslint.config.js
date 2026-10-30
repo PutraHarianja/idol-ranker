@@ -27,7 +27,14 @@ export default [
   { languageOptions: { globals: browserGlobals } },
   {
     files: ['vite.config.js', 'appVersion.js', 'test/**/*.js'],
-    languageOptions: { globals: { process: 'readonly', console: 'readonly', performance: 'readonly', URL: 'readonly' } },
+    languageOptions: {
+      globals: {
+        process: 'readonly',
+        console: 'readonly',
+        performance: 'readonly',
+        URL: 'readonly',
+      },
+    },
   },
   prettier,
 ]

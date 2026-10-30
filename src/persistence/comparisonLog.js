@@ -40,7 +40,10 @@ export function loadComparisons({ poolId = 'default', storage = defaultStorage()
 }
 
 /** Saves the comparisons. Returns false (instead of throwing) if storage is unavailable. */
-export function saveComparisons(comparisons, { poolId = 'default', storage = defaultStorage() } = {}) {
+export function saveComparisons(
+  comparisons,
+  { poolId = 'default', storage = defaultStorage() } = {},
+) {
   try {
     if (!storage) return false
     storage.setItem(storageKey(poolId), JSON.stringify({ version: SCHEMA_VERSION, comparisons }))

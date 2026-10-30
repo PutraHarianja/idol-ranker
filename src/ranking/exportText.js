@@ -8,8 +8,8 @@ const TOP_N = 5 // only the top of the list is copied
  */
 export function formatRankingText(ranking, { decisions, provisional, url }) {
   const header = `👑 My Top ${TOP_N} Idols (${decisions} ${decisions === 1 ? 'pick' : 'picks'}${provisional ? ', provisional' : ''})`
-  const lines = ranking.slice(0, TOP_N).map(
-    ({ rank, score, idol }) => `${rank}. ${idol.name} (${idol.group}) — ${score}`,
-  )
+  const lines = ranking
+    .slice(0, TOP_N)
+    .map(({ rank, score, idol }) => `${rank}. ${idol.name} (${idol.group}) — ${score}`)
   return [header, ...lines, '', `Rank yours: ${url}`].join('\n')
 }
