@@ -54,7 +54,13 @@ defineEmits(['pick'])
 .card--right {
   transform: rotate(1.5deg);
 }
-.card:hover,
+/* Hover only where a real pointer can hover: on touch it sticks to the last tapped card and
+   lets go (with the 0.15s transition) when the other card is tapped (#73). */
+@media (hover: hover) {
+  .card:hover {
+    transform: translateY(-4px) rotate(0deg);
+  }
+}
 .card:focus-visible {
   transform: translateY(-4px) rotate(0deg);
 }
