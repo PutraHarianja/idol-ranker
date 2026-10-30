@@ -13,6 +13,7 @@ const emit = defineEmits(['back'])
 const confirmingReset = ref(false)
 const startOverEl = ref(null)
 const cancelEl = ref(null)
+const confirmEl = ref(null)
 const copyStatus = ref('')
 // Share to Story (P1-9). The button shows only where the share sheet takes files, once the image
 // is loaded: the tap must open the sheet straight away. The hint shows as soon as the copy
@@ -61,10 +62,12 @@ async function copyRanking() {
 
 // The button that had focus disappears at each step, so move focus on (#66): Cancel is the safe
 // choice; Cancel hands it back to Start over; confirming leaves the view (App focuses the Pick tab).
+// The box is taller than Start over, so scroll all of it into view, not just Cancel (#100).
 async function askReset() {
   confirmingReset.value = true
   await nextTick()
-  cancelEl.value?.focus()
+  confirmEl.value?.scrollIntoView({ block: 'nearest' })
+  cancelEl.value?.focus({ preventScroll: true })
 }
 async function cancelReset() {
   confirmingReset.value = false
@@ -160,7 +163,13 @@ function confirmReset() {
           Start over
         </button>
       </template>
-      <div v-else class="confirm" role="alertdialog" aria-label="Confirm start over">
+      <div
+        v-else
+        ref="confirmEl"
+        class="confirm"
+        role="alertdialog"
+        aria-label="Confirm start over"
+      >
         <span>Delete all {{ store.decisions }} picks?</span>
         <button type="button" class="danger" @click="confirmReset">Yes, start over</button>
         <button ref="cancelEl" type="button" class="plain" @click="cancelReset">Cancel</button>
@@ -405,6 +414,8 @@ function confirmReset() {
   background: var(--surface);
   box-shadow: inset 0 0 0 2px var(--danger);
   font-weight: 600;
+  /* Room around it when askReset() scrolls it into view (#100). */
+  scroll-margin-block: 1rem;
 }
 button {
   display: inline-flex;
