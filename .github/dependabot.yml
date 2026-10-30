@@ -9,6 +9,10 @@ updates:
     groups:
       npm:
         patterns: ['*']
+    # Majors get their own ticket (a manual PR), not a grouped Dependabot PR.
+    ignore:
+      - dependency-name: '*'
+        update-types: ['version-update:semver-major']
   - package-ecosystem: github-actions
     directory: /
     target-branch: release/1.4.0
