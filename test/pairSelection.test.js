@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { selectPair, countAppearances } from '../src/ranking/pairSelection.js'
-import { fitBradleyTerry } from '../src/ranking/bradleyTerry.js'
+import { selectPair, countAppearances } from '@/ranking/pairSelection.js'
+import { fitBradleyTerry } from '@/ranking/bradleyTerry.js'
 import { seededRandom, kendallTau } from './helpers.js'
 
 const ids18 = Array.from({ length: 18 }, (_, i) => `idol-${i}`)
@@ -200,7 +200,10 @@ describe('adaptive pairing (P1-2)', () => {
           lastPair = [a, b]
         }
         const fit = new Map(fitBradleyTerry(ids18, log).map((r) => [r.id, r.strength]))
-        total += kendallTau(truth, ids18.map((id) => fit.get(id)))
+        total += kendallTau(
+          truth,
+          ids18.map((id) => fit.get(id)),
+        )
       }
       return total / 20
     }
@@ -210,5 +213,6 @@ describe('adaptive pairing (P1-2)', () => {
       seeds.reduce((sum, seed) => sum + meanTau(true, seed) - meanTau(false, seed), 0) /
       seeds.length
     expect(meanGap).toBeGreaterThan(0.015)
-  })
+    // Over the 5 s default on GitHub runners (slower than local), so CI timed out.
+  }, 20_000)
 })

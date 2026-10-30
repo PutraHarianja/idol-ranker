@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import { fileURLToPath, URL } from 'node:url'
 import { readAppVersion, appVersionMetas } from './appVersion.js'
 
 const appVersion = readAppVersion()
@@ -7,6 +8,7 @@ const appVersion = readAppVersion()
 // Served from https://putraharianja.github.io/idol-ranker/ on GitHub Pages.
 export default defineConfig(({ command, isPreview }) => ({
   base: command === 'build' || isPreview ? '/idol-ranker/' : '/',
+  resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } },
   define: { __APP_VERSION__: JSON.stringify(appVersion) },
   plugins: [
     vue(),
@@ -14,5 +16,6 @@ export default defineConfig(({ command, isPreview }) => ({
   ],
   test: {
     environment: 'node',
+    include: ['test/**/*.test.js'], // e2e/ belongs to Playwright
   },
 }))

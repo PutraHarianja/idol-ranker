@@ -1,10 +1,10 @@
 <script setup>
 import { computed, nextTick, ref } from 'vue'
-import { useRankingStore } from '../stores/ranking.js'
-import IdolAvatar from './IdolAvatar.vue'
-import AppIcon from './AppIcon.vue'
-import AppToast from './AppToast.vue'
-import { formatRankingText } from '../ranking/exportText.js'
+import { useRankingStore } from '@/stores/ranking.js'
+import IdolAvatar from '@/components/IdolAvatar.vue'
+import AppIcon from '@/components/AppIcon.vue'
+import AppToast from '@/components/AppToast.vue'
+import { formatRankingText } from '@/ranking/exportText.js'
 
 const store = useRankingStore()
 const emit = defineEmits(['back'])
@@ -78,12 +78,7 @@ function confirmReset() {
     </p>
 
     <ol class="podium" :class="{ 'podium--tied': hasTies }">
-      <li
-        v-for="entry in top"
-        :key="entry.id"
-        class="spot"
-        :class="`spot--${entry.rank}`"
-      >
+      <li v-for="entry in top" :key="entry.id" class="spot" :class="`spot--${entry.rank}`">
         <span class="spot__card">
           <span class="spot__tape" aria-hidden="true" />
           <IdolAvatar class="spot__photo" :idol="entry.idol" />
@@ -94,7 +89,9 @@ function confirmReset() {
         <span class="spot__rank">{{ isTied(entry) ? 'Tied ' : '' }}#{{ entry.rank }}</span>
         <span class="spot__name">{{ entry.idol.name }}</span>
         <span class="spot__group">{{ entry.idol.group }}</span>
-        <span class="spot__score"><span class="sr-only">Goddess Score </span>{{ entry.score }}</span>
+        <span class="spot__score"
+          ><span class="sr-only">Goddess Score </span>{{ entry.score }}</span
+        >
       </li>
     </ol>
 
@@ -120,7 +117,12 @@ function confirmReset() {
         Copy as text
       </button>
       <!-- "Copied" is a toast; the status text stays for screen readers. A failure stays inline. -->
-      <span v-if="copyStatus" :class="copyStatus === 'Copied' ? 'sr-only' : 'copy-status'" role="status">{{ copyStatus }}</span>
+      <span
+        v-if="copyStatus"
+        :class="copyStatus === 'Copied' ? 'sr-only' : 'copy-status'"
+        role="status"
+        >{{ copyStatus }}</span
+      >
       <AppToast :show="copyStatus === 'Copied'" anchor="bottom">Copied</AppToast>
       <template v-if="!confirmingReset">
         <button ref="startOverEl" type="button" class="plain danger-link" @click="askReset">

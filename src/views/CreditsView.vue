@@ -1,6 +1,6 @@
 <script setup>
-import { getIdols } from '../data/idols.js'
-import IdolAvatar from './IdolAvatar.vue'
+import { getIdols } from '@/data/idols.js'
+import IdolAvatar from '@/components/IdolAvatar.vue'
 
 defineEmits(['back'])
 
@@ -26,7 +26,9 @@ const LICENSE_URLS = {
       <li v-for="idol in credited" :key="idol.id" class="row">
         <IdolAvatar class="thumb" :idol="idol" />
         <span class="text">
-          <span class="name">{{ idol.name }} <span class="group">· {{ idol.group }}</span></span>
+          <span class="name"
+            >{{ idol.name }} <span class="group">· {{ idol.group }}</span></span
+          >
           <span class="meta">
             Photo by {{ idol.image.author }} ·
             <a
@@ -35,8 +37,8 @@ const LICENSE_URLS = {
               target="_blank"
               rel="noopener"
               >{{ idol.image.license }}</a
-            ><template v-else>{{ idol.image.license }}</template>
-            · <a :href="idol.image.sourceUrl" target="_blank" rel="noopener">Source</a> · cropped
+            ><template v-else>{{ idol.image.license }}</template> ·
+            <a :href="idol.image.sourceUrl" target="_blank" rel="noopener">Source</a> · cropped
           </span>
         </span>
       </li>

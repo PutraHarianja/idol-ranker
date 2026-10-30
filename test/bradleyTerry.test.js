@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { fitBradleyTerry } from '../src/ranking/bradleyTerry.js'
+import { fitBradleyTerry } from '@/ranking/bradleyTerry.js'
 import { seededRandom, kendallTau } from './helpers.js'
 
 const beat = (winnerId, loserId, times = 1) =>
@@ -55,7 +55,12 @@ describe('fitBradleyTerry (R5)', () => {
 
   describe('ties (P1-3)', () => {
     const tieOf = (a, b, times = 1) =>
-      Array.from({ length: times }, () => ({ winnerId: a, loserId: b, timestamp: 0, outcome: 'tie' }))
+      Array.from({ length: times }, () => ({
+        winnerId: a,
+        loserId: b,
+        timestamp: 0,
+        outcome: 'tie',
+      }))
     const strengthsOf = (ids, log) =>
       Object.fromEntries(fitBradleyTerry(ids, log).map((r) => [r.id, r.strength]))
 
@@ -98,7 +103,12 @@ describe('fitBradleyTerry (R5)', () => {
   })
 
   it('returns one { id, strength } per idol, sorted descending', () => {
-    const log = simulate(ids18, ids18.map(() => 1), 100, seededRandom(7))
+    const log = simulate(
+      ids18,
+      ids18.map(() => 1),
+      100,
+      seededRandom(7),
+    )
     const result = fitBradleyTerry(ids18, log)
     expect(result).toHaveLength(18)
     expect(new Set(result.map((r) => r.id))).toEqual(new Set(ids18))
@@ -114,12 +124,20 @@ describe('fitBradleyTerry (R5)', () => {
     const trueStrengths = ids18.map((_, i) => Math.exp(-2 + (4 * i) / 17))
     const log = simulate(ids18, trueStrengths, 2000, seededRandom(42))
     const fitted = new Map(fitBradleyTerry(ids18, log).map((r) => [r.id, r.strength]))
-    const tau = kendallTau(trueStrengths, ids18.map((id) => fitted.get(id)))
+    const tau = kendallTau(
+      trueStrengths,
+      ids18.map((id) => fitted.get(id)),
+    )
     expect(tau).toBeGreaterThanOrEqual(0.9)
   })
 
   it('fits 18 idols and 500 comparisons in under 50 ms', () => {
-    const log = simulate(ids18, ids18.map((_, i) => i + 1), 500, seededRandom(1))
+    const log = simulate(
+      ids18,
+      ids18.map((_, i) => i + 1),
+      500,
+      seededRandom(1),
+    )
     fitBradleyTerry(ids18, log) // warm up the JIT
     const start = performance.now()
     fitBradleyTerry(ids18, log)

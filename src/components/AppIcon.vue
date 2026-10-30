@@ -7,7 +7,8 @@ defineProps({
 // Hand-drawn icon set for the sticker-binder look (replaces emoji and Unicode arrows).
 const PATHS = {
   sparkle: 'M12 2.5 13.9 10l7.6 2-7.6 2L12 21.5 10.1 14l-7.6-2 7.6-2z',
-  heart: 'M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.2a4.3 4.3 0 0 1 7.5 2.6C19.5 15.4 12 20 12 20z',
+  heart:
+    'M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.2a4.3 4.3 0 0 1 7.5 2.6C19.5 15.4 12 20 12 20z',
   undo: 'M4.5 8h10a5 5 0 0 1 0 10H9M4.5 8 8 4.5M4.5 8 8 11.5',
   copy: 'M9 8.5h9.5v11H9zM15 8.5V4.5H5.5v11H9',
   share: 'M12 15V4M12 4 7.5 8.5M12 4l4.5 4.5M5 13v6.5h14V13',

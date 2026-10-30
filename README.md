@@ -27,6 +27,10 @@ npm run dev      # http://localhost:5173
 ```bash
 npm test         # Vitest
 npm run build    # production build in dist/
+npm run lint     # ESLint
+npm run format   # Prettier, writes files
+npm run format:check  # Prettier, check only (CI)
+npm run e2e      # phone-width browser tests (builds first); locally: E2E_CHANNEL=chrome npm run e2e
 ```
 
 ## How it's built

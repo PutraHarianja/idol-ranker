@@ -1,6 +1,6 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
-import { getGroupColor } from '../data/idols.js'
+import { getGroupColor } from '@/data/idols.js'
 
 const props = defineProps({
   idol: { type: Object, required: true },
@@ -11,7 +11,10 @@ const baseUrl = import.meta.env.BASE_URL
 
 // Falls back to initials when there's no photo or it fails to load (R10).
 const failed = ref(false)
-watch(() => props.idol.id, () => (failed.value = false))
+watch(
+  () => props.idol.id,
+  () => (failed.value = false),
+)
 
 const showPhoto = computed(() => props.idol.image?.src && !failed.value)
 const initials = computed(() =>

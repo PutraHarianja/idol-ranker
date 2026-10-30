@@ -4,3 +4,5 @@ dist
 *.log
 coverage
 .claude/settings.local.json
+playwright-report
+test-results
