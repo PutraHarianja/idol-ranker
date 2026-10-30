@@ -121,22 +121,26 @@ test('Share falls back to the link as text when the clipboard is denied', async 
 })
 
 // Share to Story (P1-9). Headless Chromium has no file share, so the share sheet is stubbed.
-async function stubFileShare(page, { cancel = false } = {}) {
-  await page.addInitScript((cancel) => {
-    window.__shared = []
-    const define = (name, value) =>
-      Object.defineProperty(navigator, name, { value, configurable: true })
-    define('canShare', (data) => Array.isArray(data?.files))
-    define('share', async (data) => {
-      window.__shared.push({
-        files: data.files.map((f) => ({ name: f.name, type: f.type, size: f.size })),
-        text: data.text,
-        url: data.url,
+async function stubFileShare(page, { cancel = false, hold = false } = {}) {
+  await page.addInitScript(
+    ({ cancel, hold }) => {
+      window.__shared = []
+      const define = (name, value) =>
+        Object.defineProperty(navigator, name, { value, configurable: true })
+      define('canShare', (data) => Array.isArray(data?.files))
+      define('share', async (data) => {
+        window.__shared.push({
+          files: data.files.map((f) => ({ name: f.name, type: f.type, size: f.size })),
+          text: data.text,
+          url: data.url,
+        })
+        if (hold) await new Promise((resolve) => (window.__closeSheet = resolve))
+        if (cancel) throw new DOMException('cancelled', 'AbortError')
       })
-      if (cancel) throw new DOMException('cancelled', 'AbortError')
-    })
-    define('clipboard', { writeText: async (text) => (window.__copied = text) })
-  }, cancel)
+      define('clipboard', { writeText: async (text) => (window.__copied = text) })
+    },
+    { cancel, hold },
+  )
 }
 
 test('Share to Story is hidden where the browser cannot share files', async ({ page }) => {
@@ -172,10 +176,16 @@ test('Share to Story shares the story image, copies the link and shows the hint'
   await expect(page.getByRole('button', { name: 'Share to Story' })).toBeFocused()
 })
 
-test('Share to Story shows no hint when the share sheet is closed', async ({ page }) => {
-  await stubFileShare(page, { cancel: true })
+test('Share to Story keeps the hint after the sheet closes, even as a cancel (#104)', async ({
+  page,
+}) => {
+  await stubFileShare(page, { cancel: true, hold: true })
   await open(page, 'My ranking')
   await page.getByRole('button', { name: 'Share to Story' }).click()
+  // The sheet is open: the hint would be hidden under it, so it isn't shown yet.
   await expect.poll(() => page.evaluate(() => window.__shared.length)).toBe(1)
   await expect(page.locator('.story-hint')).toHaveCount(0)
+  // Android reports "picked an app" as an AbortError: the hint must still appear.
+  await page.evaluate(() => window.__closeSheet())
+  await expect(page.locator('.story-hint')).toContainText('Link copied.')
 })
