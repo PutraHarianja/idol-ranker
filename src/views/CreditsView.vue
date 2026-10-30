@@ -1,6 +1,6 @@
 <script setup>
-import { getIdols } from '../data/idols.js'
-import IdolAvatar from '../components/IdolAvatar.vue'
+import { getIdols } from '@/data/idols.js'
+import IdolAvatar from '@/components/IdolAvatar.vue'
 
 defineEmits(['back'])
 
