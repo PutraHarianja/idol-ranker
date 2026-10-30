@@ -3,7 +3,7 @@ import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRankingStore } from '@/stores/ranking.js'
 import IdolCard from '@/components/IdolCard.vue'
 import AppIcon from '@/components/AppIcon.vue'
-import { preloadPhotos } from '@/browser/preloadPhotos.js'
+import { decodePhotos, preloadPhotos } from '@/browser/preloadPhotos.js'
 
 const store = useRankingStore()
 defineEmits(['show-results'])
@@ -23,8 +23,18 @@ const timing = {
 }
 
 // The store picks the next pair the moment a pick is recorded, while the flash is still showing
-// the old one. Start fetching its photos then, so they are ready when the cards flip.
-watch(() => store.pair, preloadPhotos, { immediate: true })
+// the old one. Start fetching and decoding its photos then, so they are ready when the cards
+// flip in (#74, #75). The flip waits for the decode, but never longer than DECODE_WAIT_MS.
+const DECODE_WAIT_MS = 300
+let nextReady = Promise.resolve()
+watch(
+  () => store.pair,
+  (pair) => {
+    preloadPhotos(pair)
+    nextReady = decodePhotos(pair)
+  },
+  { immediate: true },
+)
 
 const pairEl = ref(null)
 const flash = ref(null)
@@ -53,6 +63,14 @@ async function endFlash() {
   if (side) pairEl.value?.querySelectorAll('.card')[side === 'left' ? 0 : 1]?.focus()
 }
 
+// Called when the hold is over: shows the next pair once its photos are decoded (or after the cap).
+// An Undo in the meantime has already ended this flash, so only the same flash may continue.
+async function revealWhenReady() {
+  const id = flash.value?.id
+  await Promise.race([nextReady, new Promise((resolve) => setTimeout(resolve, DECODE_WAIT_MS))])
+  if (id && flash.value?.id === id) endFlash()
+}
+
 function answer(side, action) {
   // While the flash shows, the next pair is hidden: ignore picks and ties so input only ever
   // counts for a pair the user can see.
@@ -63,7 +81,7 @@ function answer(side, action) {
   if (!answered || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
   refocusSide = hadFocus
   flash.value = { id: ++flashId, pair: answered, side }
-  flashTimer = setTimeout(endFlash, FLASH_MS)
+  flashTimer = setTimeout(revealWhenReady, FLASH_MS)
 }
 const pick = (side) => answer(side, () => store.pick(side))
 const tie = () => answer('tie', () => store.tie())
