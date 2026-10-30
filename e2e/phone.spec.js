@@ -72,6 +72,19 @@ test.describe('Start over', () => {
     await expectNoHorizontalScroll(page)
   })
 
+  // #100: Start over at the very bottom of the screen (as after scrolling just far enough to see it).
+  // The confirmation is taller than the button, so all of it must scroll into view, not just Cancel.
+  test('confirmation opened from the bottom edge fits fully', async ({ page }) => {
+    await open(page, 'My ranking')
+    const startOver = page.getByRole('button', { name: 'Start over' })
+    await startOver.evaluate((el) => el.scrollIntoView({ block: 'end' }))
+    await startOver.click()
+    await expect(page.getByRole('alertdialog', { name: 'Confirm start over' })).toBeInViewport({
+      ratio: 1,
+    })
+    await expect(page.getByRole('button', { name: 'Cancel' })).toBeFocused()
+  })
+
   test('keyboard focus moves on at each step (#66)', async ({ page }) => {
     await open(page, 'My ranking')
     await page.getByRole('button', { name: 'Start over' }).focus()
