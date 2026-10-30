@@ -16,5 +16,6 @@ export default defineConfig(({ command, isPreview }) => ({
   ],
   test: {
     environment: 'node',
+    include: ['test/**/*.test.js'], // e2e/ belongs to Playwright
   },
 }))
