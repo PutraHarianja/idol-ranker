@@ -1,11 +1,12 @@
 <script setup>
-import { computed, nextTick, ref } from 'vue'
+import { computed, nextTick, onMounted, ref } from 'vue'
 import { useRankingStore } from '@/stores/ranking.js'
 import IdolAvatar from '@/components/IdolAvatar.vue'
 import AppIcon from '@/components/AppIcon.vue'
 import AppToast from '@/components/AppToast.vue'
 import StoryShareButton from '@/components/StoryShareButton.vue'
 import { formatRankingText } from '@/ranking/exportText.js'
+import { canShareFiles, loadStoryFile, shareStory as shareStoryFile } from '@/browser/share.js'
 
 const store = useRankingStore()
 const emit = defineEmits(['back'])
@@ -13,11 +14,27 @@ const confirmingReset = ref(false)
 const startOverEl = ref(null)
 const cancelEl = ref(null)
 const copyStatus = ref('')
-// Share to Story (P1-9). #62 (FE): set canShareStory from file-share support, share public/story.jpg
-// in shareStory, and set storyHint to 'copied' or 'sticker'. Hidden until then.
+// Share to Story (P1-9). The button shows only where the share sheet takes files, once the image
+// is loaded: the tap must open the sheet straight away. The hint shows as soon as the copy
+// settles, so it's there on the way into Instagram, and goes away if the share doesn't happen.
 const canShareStory = ref(false)
 const storyHint = ref('')
-function shareStory() {}
+const storyError = ref('')
+let storyFile = null
+onMounted(async () => {
+  if (!canShareFiles()) return
+  storyFile = await loadStoryFile(import.meta.env.BASE_URL + 'story.jpg')
+  canShareStory.value = !!storyFile
+})
+async function shareStory() {
+  storyError.value = ''
+  const { status } = await shareStoryFile(storyFile, (copied) => {
+    storyHint.value = copied ? 'copied' : 'sticker'
+  })
+  if (status === 'shared') return
+  storyHint.value = ''
+  if (status === 'failed') storyError.value = "Couldn't open the share sheet. Please try again."
+}
 
 // Everyone ranked 1-3 sits on the "binder page" (equal scores share a rank, so that can be
 // more than three idols); everyone else is in the list below.
@@ -136,6 +153,7 @@ function confirmReset() {
         @share-story="shareStory"
         @dismiss="storyHint = ''"
       />
+      <span v-if="storyError" class="copy-status" role="status">{{ storyError }}</span>
       <template v-if="!confirmingReset">
         <button ref="startOverEl" type="button" class="plain danger-link" @click="askReset">
           <AppIcon name="restart" :size="16" />
