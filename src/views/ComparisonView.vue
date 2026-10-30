@@ -39,6 +39,9 @@ watch(
 const pairEl = ref(null)
 const flash = ref(null)
 const revealing = ref(false)
+// True between the flash ending and the flip-in class going on, so the new pair stays hidden and
+// never shows un-rotated for a frame before it flips in (#89).
+const settling = ref(false)
 let flashId = 0
 let flashTimer = 0
 let refocusSide = null
@@ -55,11 +58,15 @@ async function endFlash() {
   clearTimeout(flashTimer)
   flash.value = null
   revealing.value = false
+  settling.value = true
   const side = refocusSide
   refocusSide = null
   await nextTick()
-  requestAnimationFrame(() => (revealing.value = true))
-  // Hidden cards lose focus, so put it back on the same side (keyboard users).
+  await new Promise((resolve) => requestAnimationFrame(resolve))
+  revealing.value = true
+  settling.value = false
+  await nextTick()
+  // Hidden cards can't hold focus, so put it back on the same side once the pair shows (keyboard users).
   if (side) pairEl.value?.querySelectorAll('.card')[side === 'left' ? 0 : 1]?.focus()
 }
 
@@ -150,7 +157,11 @@ const milestone = computed(() => MILESTONES[store.stage])
     </div>
 
     <div v-if="store.pair" class="stage" :style="timing">
-      <div ref="pairEl" class="pair" :class="{ 'pair--waiting': flash, 'pair--reveal': revealing }">
+      <div
+        ref="pairEl"
+        class="pair"
+        :class="{ 'pair--waiting': flash || settling, 'pair--reveal': revealing }"
+      >
         <IdolCard :idol="store.pair[0]" side="left" key-hint="←" @pick="pick('left')" />
         <IdolCard :idol="store.pair[1]" side="right" key-hint="→" @pick="pick('right')" />
       </div>
@@ -307,6 +318,7 @@ const milestone = computed(() => MILESTONES[store.stage])
 }
 .pair--reveal > :deep(*) {
   animation: flip-in var(--flip) ease-out backwards;
+  will-change: transform; /* layer ready before the first rotated frame (#89) */
 }
 .pair--reveal > :deep(:nth-child(2)) {
   animation-delay: var(--stagger);
@@ -455,6 +467,7 @@ const milestone = computed(() => MILESTONES[store.stage])
   }
   .pair--reveal > :deep(*) {
     animation: none;
+    will-change: auto;
   }
 }
 </style>
