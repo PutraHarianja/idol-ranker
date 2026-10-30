@@ -16,8 +16,8 @@ const cancelEl = ref(null)
 const confirmEl = ref(null)
 const copyStatus = ref('')
 // Share to Story (P1-9). The button shows only where the share sheet takes files, once the image
-// is loaded: the tap must open the sheet straight away. The hint shows as soon as the copy
-// settles, so it's there on the way into Instagram, and goes away if the share doesn't happen.
+// is loaded: the tap must open the sheet straight away. The hint waits until the sheet is done, so
+// it isn't hidden under it. Android reports "picked an app" as a cancel, so a cancel keeps it too (#104).
 const canShareStory = ref(false)
 const storyHint = ref('')
 const storyError = ref('')
@@ -29,12 +29,13 @@ onMounted(async () => {
 })
 async function shareStory() {
   storyError.value = ''
-  const { status } = await shareStoryFile(storyFile, (copied) => {
-    storyHint.value = copied ? 'copied' : 'sticker'
-  })
-  if (status === 'shared') return
   storyHint.value = ''
-  if (status === 'failed') storyError.value = "Couldn't open the share sheet. Please try again."
+  const { status, copied } = await shareStoryFile(storyFile)
+  if (status === 'failed') {
+    storyError.value = "Couldn't open the share sheet. Please try again."
+    return
+  }
+  storyHint.value = copied ? 'copied' : 'sticker'
 }
 
 // Everyone ranked 1-3 sits on the "binder page" (equal scores share a rank, so that can be
