@@ -4,7 +4,7 @@ import {
   saveComparisons,
   clearComparisons,
   storageKey,
-} from '../src/persistence/comparisonLog.js'
+} from '@/persistence/comparisonLog.js'
 
 function fakeStorage(initial = {}) {
   const data = { ...initial }

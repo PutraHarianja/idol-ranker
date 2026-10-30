@@ -1,10 +1,10 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
-import { getIdols } from '../data/idols.js'
-import { fitBradleyTerry } from '../ranking/bradleyTerry.js'
-import { selectPair, countAppearances } from '../ranking/pairSelection.js'
-import { rankWithScores, comparisonTarget, MIN_APPEARANCES } from '../ranking/score.js'
-import { loadComparisons, saveComparisons, clearComparisons } from '../persistence/comparisonLog.js'
+import { getIdols } from '@/data/idols.js'
+import { fitBradleyTerry } from '@/ranking/bradleyTerry.js'
+import { selectPair, countAppearances } from '@/ranking/pairSelection.js'
+import { rankWithScores, comparisonTarget, MIN_APPEARANCES } from '@/ranking/score.js'
+import { loadComparisons, saveComparisons, clearComparisons } from '@/persistence/comparisonLog.js'
 
 export const useRankingStore = defineStore('ranking', () => {
   const idols = getIdols()

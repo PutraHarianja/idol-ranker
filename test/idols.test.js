@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { existsSync, statSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
-import { getIdols } from '../src/data/idols.js'
+import { getIdols } from '@/data/idols.js'
 
 describe('getIdols (R1)', () => {
   it('holds 18 idols: 3 from each of 6 groups', () => {
