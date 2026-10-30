@@ -64,7 +64,9 @@ async function endFlash() {
   const side = refocusSide
   refocusSide = null
   await nextTick()
-  await new Promise((resolve) => requestAnimationFrame(resolve))
+  // Force a style recalculation so the browser really sees .pair--reveal removed; without it the
+  // class comes straight back and the flip-in animation never restarts after the first pick.
+  void pairEl.value?.offsetWidth
   revealing.value = true
   settling.value = false
   await nextTick()
