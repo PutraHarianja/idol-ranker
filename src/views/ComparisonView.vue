@@ -14,7 +14,7 @@ defineEmits(['show-results'])
 // is updated immediately; the flash only delays what the user sees, never what gets recorded.
 const HOLD_MS = 500 // sticker lands and holds
 const FLIP_MS = 180 // flip-out half
-const FLIP_IN_MS = 240 // flip-in half: a touch slower so the new pair reads as arriving (#89)
+const FLIP_IN_MS = 360 // flip-in half: a touch slower so the new pair reads as arriving (#89)
 const STAGGER_MS = 40 // right card trails the left
 const FLASH_MS = HOLD_MS + STAGGER_MS + FLIP_MS
 const timing = {
