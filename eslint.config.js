@@ -26,7 +26,7 @@ export default [
   ...pluginVue.configs['flat/recommended'],
   { languageOptions: { globals: browserGlobals } },
   {
-    files: ['vite.config.js', 'appVersion.js', 'test/**/*.js'],
+    files: ['vite.config.js', 'playwright.config.js', 'appVersion.js', 'test/**/*.js'],
     languageOptions: {
       globals: {
         process: 'readonly',
