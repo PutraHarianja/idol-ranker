@@ -45,27 +45,27 @@
    "almost" stage is violet here. Text stays AA everywhere; the accent is only large text, icons, fills. */
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #232f8a;
-    --surface: #3242a3;
+    --bg: #1b2660;
+    --surface: #28367a;
     --text: #eef2fa;
-    --muted: #cdd4f0;
-    --border: #4a5bb8;
-    --accent: #ff8596;
+    --muted: #c3cbe8;
+    --border: #3d4c8c;
+    --accent: #ff7083;
     --on-accent: #101b38;
-    --accent-soft: #3242a3;
-    --warn-soft: #6b5010;
-    --warn-text: #f8df95;
-    --danger: #ffaca4;
+    --accent-soft: #28367a;
+    --warn-soft: #56420f;
+    --warn-text: #f5d98b;
+    --danger: #ff8a80;
     --shadow: 0 1px 0 rgb(0 0 0 / 0.25), 0 14px 30px -14px rgb(5 8 30 / 0.75);
     color-scheme: dark;
   }
   :root[data-stage='half'] {
-    --bg: #0d6266;
+    --bg: #0f4a4c;
   }
   :root[data-stage='almost'] {
-    --bg: #4d34a6;
+    --bg: #3f2a78;
   }
   :root[data-stage='ready'] {
-    --bg: #7a2463;
+    --bg: #5a1d45;
   }
 }
