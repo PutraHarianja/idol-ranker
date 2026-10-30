@@ -14,6 +14,11 @@ export const useRankingStore = defineStore('ranking', () => {
   const comparisons = ref(loadComparisons())
   const currentPair = ref(null)
   const lastPair = ref(null)
+  // Every pair shown this session as [leftId, rightId], indexed by how many picks came before it:
+  // shown[i] is the pair on screen after i picks. Undo walks back through it and the next
+  // pick or tie walks forward again, replaying stored pairs, like browser history (#71, #72).
+  // Memory only: a reload starts with no history, and Start over clears it.
+  const shown = []
   // Text for the screen-reader live region (F10). Set after every pick, tie and undo.
   const announcement = ref('')
 
@@ -61,11 +66,15 @@ export const useRankingStore = defineStore('ranking', () => {
 
   function nextPair() {
     lastPair.value = currentPair.value
-    const strengths = new Map(ranking.value.map((entry) => [entry.id, entry.strength]))
-    currentPair.value = selectPair(idolIds, validComparisons.value, {
-      lastPair: lastPair.value,
-      strengths,
-    })
+    const position = comparisons.value.length
+    if (!shown[position]) {
+      const strengths = new Map(ranking.value.map((entry) => [entry.id, entry.strength]))
+      shown[position] = selectPair(idolIds, validComparisons.value, {
+        lastPair: lastPair.value,
+        strengths,
+      })
+    }
+    currentPair.value = shown[position]
   }
 
   /** Records a pick for the idol on `side` ('left' | 'right') and loads the next pair (R2). */
@@ -100,18 +109,25 @@ export const useRankingStore = defineStore('ranking', () => {
     saveComparisons(comparisons.value)
     lastPair.value = null
     announce(`Undid your last pick. ${decisions.value} of ${target}.`)
-    const { winnerId, loserId } = last
-    if (idolsById.has(winnerId) && idolsById.has(loserId)) {
-      currentPair.value = Math.random() < 0.5 ? [winnerId, loserId] : [loserId, winnerId]
-    } else {
-      currentPair.value = selectPair(idolIds, validComparisons.value)
+    const position = comparisons.value.length
+    if (!shown[position]) {
+      // No stored pair (the page was reloaded since this pick): rebuild it from the log, sides unknown.
+      const { winnerId, loserId } = last
+      shown[position] =
+        idolsById.has(winnerId) && idolsById.has(loserId)
+          ? Math.random() < 0.5
+            ? [winnerId, loserId]
+            : [loserId, winnerId]
+          : selectPair(idolIds, validComparisons.value)
     }
+    currentPair.value = shown[position]
   }
 
   /** Clears the log and storage (R9). Confirmation is handled by the UI. */
   function reset() {
     comparisons.value = []
     clearComparisons()
+    shown.length = 0
     currentPair.value = null
     lastPair.value = null
     nextPair()
