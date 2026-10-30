@@ -13,12 +13,14 @@ defineEmits(['show-results'])
 // next pair, like turning photocards. Cards stay opaque, so two faces never blend. The store
 // is updated immediately; the flash only delays what the user sees, never what gets recorded.
 const HOLD_MS = 500 // sticker lands and holds
-const FLIP_MS = 180 // each half of the flip (out, then in)
+const FLIP_MS = 180 // flip-out half
+const FLIP_IN_MS = 240 // flip-in half: a touch slower so the new pair reads as arriving (#89)
 const STAGGER_MS = 40 // right card trails the left
 const FLASH_MS = HOLD_MS + STAGGER_MS + FLIP_MS
 const timing = {
   '--hold': `${HOLD_MS}ms`,
   '--flip': `${FLIP_MS}ms`,
+  '--flip-in': `${FLIP_IN_MS}ms`,
   '--stagger': `${STAGGER_MS}ms`,
 }
 
@@ -290,7 +292,7 @@ const milestone = computed(() => MILESTONES[store.stage])
 /* The answered pair, held fully opaque on top while the sticker lands, then flipped away
    edge-on. The next pair waits hidden and flips in from the other edge. No opacity fades:
    a cross-fade would blend two idols' faces. Timing comes from the --hold / --flip /
-   --stagger variables set in the script (the same numbers end the flash). */
+   --flip-in / --stagger variables set in the script (the same numbers end the flash). */
 .flash {
   position: absolute;
   inset: 8px 0 auto;
@@ -317,7 +319,7 @@ const milestone = computed(() => MILESTONES[store.stage])
   perspective: 900px;
 }
 .pair--reveal > :deep(*) {
-  animation: flip-in var(--flip) ease-out backwards;
+  animation: flip-in var(--flip-in) ease-out backwards;
   will-change: transform; /* layer ready before the first rotated frame (#89) */
 }
 .pair--reveal > :deep(:nth-child(2)) {
