@@ -27,6 +27,9 @@ npm run dev      # http://localhost:5173
 ```bash
 npm test         # Vitest
 npm run build    # production build in dist/
+npm run lint     # ESLint
+npm run format   # Prettier, writes files
+npm run format:check  # Prettier, check only (CI)
 ```
 
 ## How it's built

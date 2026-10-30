@@ -200,7 +200,10 @@ describe('adaptive pairing (P1-2)', () => {
           lastPair = [a, b]
         }
         const fit = new Map(fitBradleyTerry(ids18, log).map((r) => [r.id, r.strength]))
-        total += kendallTau(truth, ids18.map((id) => fit.get(id)))
+        total += kendallTau(
+          truth,
+          ids18.map((id) => fit.get(id)),
+        )
       }
       return total / 20
     }

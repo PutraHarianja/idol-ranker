@@ -126,15 +126,13 @@ const milestone = computed(() => MILESTONES[store.stage])
         <AppIcon name="sparkle" :size="20" class="ready__icon" />
         {{ store.decisions }} picks in!
       </span>
-      <button type="button" class="cta" @click="$emit('show-results')">See my ranking so far</button>
+      <button type="button" class="cta" @click="$emit('show-results')">
+        See my ranking so far
+      </button>
     </div>
 
     <div v-if="store.pair" class="stage" :style="timing">
-      <div
-        ref="pairEl"
-        class="pair"
-        :class="{ 'pair--waiting': flash, 'pair--reveal': revealing }"
-      >
+      <div ref="pairEl" class="pair" :class="{ 'pair--waiting': flash, 'pair--reveal': revealing }">
         <IdolCard :idol="store.pair[0]" side="left" key-hint="←" @pick="pick('left')" />
         <IdolCard :idol="store.pair[1]" side="right" key-hint="→" @pick="pick('right')" />
       </div>

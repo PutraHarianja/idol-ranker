@@ -10,7 +10,8 @@ const IDOLS = [
       src: '/idols/blackpink-jisoo.webp',
       author: '티비텐 TV10',
       license: 'CC BY 4.0',
-      sourceUrl: 'https://commons.wikimedia.org/wiki/File:Jisoo_at_Boyfriend_on_Demand_press_conference_on_26022026_(12).png',
+      sourceUrl:
+        'https://commons.wikimedia.org/wiki/File:Jisoo_at_Boyfriend_on_Demand_press_conference_on_26022026_(12).png',
     },
   },
   {
@@ -54,7 +55,8 @@ const IDOLS = [
       src: '/idols/twice-tzuyu.webp',
       author: 'David Lee from Redmond, WA, USA',
       license: 'CC BY 4.0',
-      sourceUrl: 'https://commons.wikimedia.org/wiki/File:Twice_in_Seattle_2026_-_TWICE._Tzuyu_(55045325500)_(cropped).jpg',
+      sourceUrl:
+        'https://commons.wikimedia.org/wiki/File:Twice_in_Seattle_2026_-_TWICE._Tzuyu_(55045325500)_(cropped).jpg',
     },
   },
   {
@@ -76,7 +78,8 @@ const IDOLS = [
       src: '/idols/redvelvet-irene.webp',
       author: '티비텐',
       license: 'CC BY 3.0',
-      sourceUrl: 'https://commons.wikimedia.org/wiki/File:250320_%EB%A0%88%EB%93%9C%EB%B2%A8%EB%B2%B3_Irene_UGG_Photo_Call.jpg',
+      sourceUrl:
+        'https://commons.wikimedia.org/wiki/File:250320_%EB%A0%88%EB%93%9C%EB%B2%A8%EB%B2%B3_Irene_UGG_Photo_Call.jpg',
     },
   },
   {
@@ -109,7 +112,8 @@ const IDOLS = [
       src: '/idols/aespa-karina.webp',
       author: '티비텐 TV10',
       license: 'CC BY 4.0',
-      sourceUrl: 'https://commons.wikimedia.org/wiki/File:Karina_at_Gimpo_Airport_on_April_22,_2026_03.png',
+      sourceUrl:
+        'https://commons.wikimedia.org/wiki/File:Karina_at_Gimpo_Airport_on_April_22,_2026_03.png',
     },
   },
   {
@@ -120,7 +124,8 @@ const IDOLS = [
       src: '/idols/aespa-winter.webp',
       author: 'K-POPIT 케이팝잇',
       license: 'CC BY 4.0',
-      sourceUrl: 'https://commons.wikimedia.org/wiki/File:Winter_at_Incheon_Airport_on_July_10,_2026.png',
+      sourceUrl:
+        'https://commons.wikimedia.org/wiki/File:Winter_at_Incheon_Airport_on_July_10,_2026.png',
     },
   },
   {
@@ -131,7 +136,8 @@ const IDOLS = [
       src: '/idols/aespa-ningning.webp',
       author: 'K-POPIT 케이팝잇',
       license: 'CC BY 4.0',
-      sourceUrl: 'https://commons.wikimedia.org/wiki/File:072926_Ningning_at_Gucci_photocall_05.png',
+      sourceUrl:
+        'https://commons.wikimedia.org/wiki/File:072926_Ningning_at_Gucci_photocall_05.png',
     },
   },
   {
@@ -142,7 +148,8 @@ const IDOLS = [
       src: '/idols/ive-wonyoung.webp',
       author: 'K-POPIT 케이팝잇',
       license: 'CC BY 4.0',
-      sourceUrl: 'https://commons.wikimedia.org/wiki/File:Jang_Won-young_at_the_Bulgari_Eclettica_event_in_Seoul,_May_12,_2026_(1).png',
+      sourceUrl:
+        'https://commons.wikimedia.org/wiki/File:Jang_Won-young_at_the_Bulgari_Eclettica_event_in_Seoul,_May_12,_2026_(1).png',
     },
   },
   {
@@ -164,7 +171,8 @@ const IDOLS = [
       src: '/idols/ive-rei.webp',
       author: 'K-POPIT 케이팝잇',
       license: 'CC BY 4.0',
-      sourceUrl: 'https://commons.wikimedia.org/wiki/File:Rei_of_Ive_at_the_Valentino_event,_March_20,_2026_(4).png',
+      sourceUrl:
+        'https://commons.wikimedia.org/wiki/File:Rei_of_Ive_at_the_Valentino_event,_March_20,_2026_(4).png',
     },
   },
   {
@@ -175,7 +183,8 @@ const IDOLS = [
       src: '/idols/lesserafim-sakura.webp',
       author: '티비텐 TV10',
       license: 'CC BY 4.0',
-      sourceUrl: 'https://commons.wikimedia.org/wiki/File:20260110_Le_Sserafim%27s_Sakura_Miyawaki_01.png',
+      sourceUrl:
+        'https://commons.wikimedia.org/wiki/File:20260110_Le_Sserafim%27s_Sakura_Miyawaki_01.png',
     },
   },
   {
@@ -186,7 +195,8 @@ const IDOLS = [
       src: '/idols/lesserafim-kazuha.webp',
       author: '티비텐',
       license: 'CC BY 3.0',
-      sourceUrl: 'https://commons.wikimedia.org/wiki/File:Kazuha_of_Le_Sserafim,_April_5,_2024_(2).png',
+      sourceUrl:
+        'https://commons.wikimedia.org/wiki/File:Kazuha_of_Le_Sserafim,_April_5,_2024_(2).png',
     },
   },
   {

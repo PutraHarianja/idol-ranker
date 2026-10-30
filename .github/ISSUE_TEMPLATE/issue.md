@@ -6,12 +6,9 @@ labels: ''
 
 ## What and why
 
-
 ## Do
 
-
 ## Done when
-
 
 ## Screenshots (issues about how something looks)
 
