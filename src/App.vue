@@ -12,12 +12,20 @@ import '@/styles/base.css'
 const store = useRankingStore()
 const view = ref('compare')
 const pickTab = ref(null)
+const creditsLink = ref(null)
 
 // Leaving My ranking unmounts the button that had focus, so land on the Pick tab (#66).
 async function backToPick() {
   view.value = 'compare'
   await nextTick()
   pickTab.value?.focus()
+}
+
+// Leaving Photo credits unmounts its Back button, so return to the footer link that opened it (#70).
+async function backFromCredits() {
+  view.value = 'compare'
+  await nextTick()
+  creditsLink.value?.focus()
 }
 
 // 'copied' → chip + polite announcement, 'manual' → link as selectable text; shared/cancelled show nothing.
@@ -91,12 +99,14 @@ watchEffect(() => {
     <main>
       <ComparisonView v-if="view === 'compare'" @show-results="view = 'results'" />
       <ResultsView v-else-if="view === 'results'" @back="backToPick" />
-      <CreditsView v-else @back="view = 'compare'" />
+      <CreditsView v-else @back="backFromCredits" />
     </main>
 
     <footer class="footer">
       Photos from Wikimedia Commons ·
-      <button type="button" class="link" @click="view = 'credits'">Photo credits</button>
+      <button ref="creditsLink" type="button" class="link" @click="view = 'credits'">
+        Photo credits
+      </button>
     </footer>
   </div>
 </template>
