@@ -169,13 +169,11 @@ describe('Share to Story (P1-9)', () => {
     it('copies the link and shares the image with the P1-7 text, no url', async () => {
       const share = vi.fn().mockResolvedValue()
       const writeText = vi.fn().mockResolvedValue()
-      const onCopy = vi.fn()
       stub({ share, writeText })
-      expect(await shareStory(file, onCopy)).toEqual({ status: 'shared', copied: true })
+      expect(await shareStory(file)).toEqual({ status: 'shared', copied: true })
       expect(writeText).toHaveBeenCalledWith(APP_URL)
       expect(share).toHaveBeenCalledWith({ files: [file], title: SHARE_TITLE, text: SHARE_TEXT })
       expect(share.mock.calls[0][0]).not.toHaveProperty('url')
-      expect(onCopy).toHaveBeenCalledWith(true)
     })
 
     it('starts the copy before the share, in the same task (one gesture)', async () => {
@@ -191,11 +189,9 @@ describe('Share to Story (P1-9)', () => {
 
     it('still shares when the copy is refused, and reports copied: false', async () => {
       const share = vi.fn().mockResolvedValue()
-      const onCopy = vi.fn()
       stub({ share, writeText: vi.fn().mockRejectedValue(new Error('NotAllowedError')) })
-      expect(await shareStory(file, onCopy)).toEqual({ status: 'shared', copied: false })
+      expect(await shareStory(file)).toEqual({ status: 'shared', copied: false })
       expect(share).toHaveBeenCalled()
-      expect(onCopy).toHaveBeenCalledWith(false)
     })
 
     it('reports copied: false when the clipboard API is missing', async () => {
@@ -223,14 +219,6 @@ describe('Share to Story (P1-9)', () => {
         },
       })
       expect(await shareStory(file)).toEqual({ status: 'failed', copied: false })
-    })
-
-    it('runs onCopy before it resolves, so a cancel can clear the hint after it', async () => {
-      const calls = []
-      stub({ share: vi.fn().mockRejectedValue(abort()), writeText: vi.fn().mockResolvedValue() })
-      await shareStory(file, () => calls.push('onCopy'))
-      calls.push('resolved')
-      expect(calls).toEqual(['onCopy', 'resolved'])
     })
   })
 })

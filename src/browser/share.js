@@ -75,14 +75,11 @@ async function copyLink() {
 /**
  * Call from a click handler with the File from loadStoryFile(). Starts the copy first, then opens the
  * share sheet in the same task: Chrome's share() uses up the gesture, so a copy after it would fail.
- * `onCopy(copied)` runs as soon as the copy settles, before the result. Never throws.
+ * Never throws.
  * @returns {Promise<{ status: 'shared' | 'cancelled' | 'failed', copied: boolean }>}
  */
-export async function shareStory(file, onCopy = () => {}) {
-  const copy = copyLink().then((copied) => {
-    onCopy(copied)
-    return copied
-  })
+export async function shareStory(file) {
+  const copy = copyLink()
   let status = 'shared'
   try {
     // Link in `text`, never `url`, as in shareApp() (#50, #51).
